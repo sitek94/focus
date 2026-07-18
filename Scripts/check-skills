@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+SOURCES="$ROOT/.agents/skills/SOURCES.md"
+NOTICES="$ROOT/THIRD_PARTY_NOTICES.md"
+
+if [[ ! -f "$SOURCES" ]]; then
+  echo "check-skills: missing $SOURCES" >&2
+  exit 1
+fi
+
+if [[ ! -f "$NOTICES" ]]; then
+  echo "check-skills: missing $NOTICES" >&2
+  exit 1
+fi
+
+# Minimal foundation check: every planned skill name in SOURCES.md must be
+# mentioned in THIRD_PARTY_NOTICES.md. Full URL/SHA/license validation lands
+# with adapted skill trees.
+missing=0
+while IFS= read -r skill; do
+  [[ -z "$skill" ]] && continue
+  if ! grep -Fq "$skill" "$NOTICES"; then
+    echo "check-skills: '$skill' listed in SOURCES.md but not in THIRD_PARTY_NOTICES.md" >&2
+    missing=1
+  fi
+done < <(grep -E '^\| `?[a-z0-9-]+`?' "$SOURCES" | sed -E 's/^\|[[:space:]]*`?([a-z0-9-]+)`?.*/\1/' | grep -E '^(focus-|release-)' || true)
+
+if [[ "$missing" -ne 0 ]]; then
+  exit 1
+fi
+
+echo "check-skills: ok (SOURCES.md ↔ THIRD_PARTY_NOTICES.md)"
