@@ -78,73 +78,56 @@ Focus links the OS/system SQLite library. No third-party SQLite wrapper is vendo
 
 Pinned through `tools/projectgen/Package.swift` for deterministic project generation.
 
+## Copied agent skills (verbatim)
+
+The skills below are verbatim copies from Dimillian/Skills. Provenance is
+recorded here and in `.agents/skills/SOURCES.md`; copied trees are not modified
+with Focus metadata headers.
+
+| Field | Value |
+|---|---|
+| Classification | copied (verbatim) |
+| Upstream | https://github.com/Dimillian/Skills |
+| Commit | `05ba982bfeb0d77d3c97d4542b0ee15034d05f84` |
+| License | MIT |
+
+| Source directory | Focus path |
+|---|---|
+| `swiftui-ui-patterns/` | `.agents/skills/swiftui-ui-patterns/` |
+| `swiftui-view-refactor/` | `.agents/skills/swiftui-view-refactor/` |
+| `swiftui-performance-audit/` | `.agents/skills/swiftui-performance-audit/` |
+| `swift-concurrency-expert/` | `.agents/skills/swift-concurrency-expert/` |
+| `swiftui-liquid-glass/` | `.agents/skills/swiftui-liquid-glass/` |
+
+MIT License
+
+Copyright (c) 2026 Thomas Ricouard
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
 ## Adapted agent skills
 
 Each adapted skill under `.agents/skills/` records upstream URL, full SHA, source
 paths, license, and copied-vs-adapted disposition in its `SKILL.md` header.
 `make check-skills` validates `.agents/skills/SOURCES.md` against this file and
-those headers. Disposition for the three MIT skills below is **adapted**
-(substantial rewrite; not verbatim copies).
-
-### focus-swiftui
-
-| Field | Value |
-|---|---|
-| Classification | adapted |
-| Upstream | https://github.com/AvdLee/SwiftUI-Agent-Skill |
-| Commit | `f06d1437a3fbec7df6cdce93f77004e5409b31ee` |
-| License | MIT |
-| Source paths | `swiftui-expert-skill/SKILL.md`; `swiftui-expert-skill/references/{macos-scenes,macos-window-styling,liquid-glass,localization,accessibility-patterns,view-structure}.md` |
-| Focus path | `.agents/skills/focus-swiftui/SKILL.md` |
-
-Copyright (c) 2026 Antoine van der Lee
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-### focus-concurrency
-
-| Field | Value |
-|---|---|
-| Classification | adapted |
-| Upstream | https://github.com/AvdLee/Swift-Concurrency-Agent-Skill |
-| Commit | `0d472de78225d2875283c35eaca1c060c493bdb3` |
-| License | MIT |
-| Source paths | `swift-concurrency/SKILL.md`; `swift-concurrency/references/{actors,sendable,tasks,testing,threading}.md` |
-| Focus path | `.agents/skills/focus-concurrency/SKILL.md` |
-
-Copyright (c) 2026 Antoine van der Lee
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+those headers. Disposition for the MIT skill below is **adapted** (substantial
+rewrite; not verbatim copy).
 
 ### focus-testing
 

@@ -31,7 +31,10 @@ require_field() {
 # Rows: | `skill-name` | ...
 while IFS= read -r line; do
   skill="$(sed -E 's/^\|[[:space:]]*`?([a-z0-9-]+)`?.*/\1/' <<<"$line")"
-  [[ "$skill" =~ ^(focus-|release-) ]] || continue
+  row_upstream="$(awk -F'|' '{gsub(/^[ \t]+|[ \t]+$/, "", $3); print $3}' <<<"$line")"
+  row_commit="$(awk -F'|' '{gsub(/[ `\t]/, "", $4); print $4}' <<<"$line")"
+  row_license="$(awk -F'|' '{gsub(/^[ \t]+|[ \t]+$/, "", $5); print $5}' <<<"$line")"
+  row_disposition="$(awk -F'|' '{gsub(/^[ \t]+|[ \t]+$/, "", $6); print $6}' <<<"$line")"
 
   if ! grep -Fq "$skill" "$NOTICES"; then
     echo "check-skills: '$skill' listed in SOURCES.md but not in THIRD_PARTY_NOTICES.md" >&2
@@ -45,15 +48,30 @@ while IFS= read -r line; do
     continue
   fi
 
-  # YAML / provenance header fields required for every Focus skill.
   require_field "$skill_md" '^name:[[:space:]]*'"$skill"'$' "name: $skill"
-  require_field "$skill_md" '^disposition:[[:space:]]*(adapted|original)$' "disposition"
-  require_field "$skill_md" '^license:[[:space:]]' "license"
-  require_field "$skill_md" '^upstream:[[:space:]]' "upstream"
 
-  disposition="$(grep -E '^disposition:' "$skill_md" | head -1 | awk '{print $2}')"
-  case "$disposition" in
+  case "$row_disposition" in
+    copied)
+      if [[ ! "$row_upstream" =~ ^https:// ]]; then
+        echo "check-skills: $skill copied row must use an https upstream URL" >&2
+        fail=1
+      fi
+      if [[ "$row_license" != "MIT" ]]; then
+        echo "check-skills: $skill copied row must declare MIT (got '$row_license')" >&2
+        fail=1
+      fi
+      if [[ ! "$row_commit" =~ ^[0-9a-f]{40}$ ]]; then
+        echo "check-skills: $skill copied row commit must be a full 40-char SHA (got '${row_commit:-empty}')" >&2
+        fail=1
+      elif ! grep -Fq "$row_commit" "$NOTICES"; then
+        echo "check-skills: $skill commit $row_commit not found in THIRD_PARTY_NOTICES.md" >&2
+        fail=1
+      fi
+      ;;
     adapted)
+      require_field "$skill_md" '^disposition:[[:space:]]*adapted$' "disposition: adapted"
+      require_field "$skill_md" '^license:[[:space:]]' "license"
+      require_field "$skill_md" '^upstream:[[:space:]]' "upstream"
       commit="$(grep -E '^commit:' "$skill_md" | head -1 | awk '{print $2}')"
       if [[ ! "$commit" =~ ^[0-9a-f]{40}$ ]]; then
         echo "check-skills: $skill_md commit must be a full 40-char SHA (got '${commit:-empty}')" >&2
@@ -81,17 +99,20 @@ while IFS= read -r line; do
       fi
       ;;
     original)
+      require_field "$skill_md" '^disposition:[[:space:]]*original$' "disposition: original"
+      require_field "$skill_md" '^license:[[:space:]]' "license"
+      require_field "$skill_md" '^upstream:[[:space:]]' "upstream"
       require_field "$skill_md" '^upstream:[[:space:]]*Focus-authored$' "upstream: Focus-authored"
       require_field "$skill_md" 'Disposition \| \*\*original\*\*' "Provenance disposition original"
       ;;
     *)
-      echo "check-skills: $skill_md unknown disposition '$disposition'" >&2
+      echo "check-skills: $skill has unknown SOURCES.md disposition '$row_disposition'" >&2
       fail=1
       ;;
   esac
 done < <(grep -E '^\| `?[a-z0-9-]+`?' "$SOURCES" || true)
 
-# Notices must not claim planned placeholders for the four curated skills.
+# Notices must not claim planned placeholders for curated skills.
 if grep -Eiq 'adapted \(planned\)|original \(planned\)|\(planned\)' "$NOTICES"; then
   echo "check-skills: THIRD_PARTY_NOTICES.md still contains planned placeholders" >&2
   fail=1
