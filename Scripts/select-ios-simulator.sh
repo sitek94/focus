@@ -76,6 +76,16 @@ if [[ -z "$destination" || "$destination" != platform=iOS\ Simulator,id=* ]]; th
   exit 1
 fi
 
+# Boot the resolved simulator and block until it is fully ready. Without this,
+# xcodebuild boots the device inline and races its own install on a cold sim,
+# intermittently failing with "Simulator device failed to install the
+# application." `bootstatus -b` boots if needed and returns once ready. Keep all
+# output on stderr so stdout stays the bare destination that callers capture.
+udid="${destination##*id=}"
+if [[ -n "$udid" ]]; then
+  xcrun simctl bootstatus "$udid" -b 1>&2 || true
+fi
+
 export IOS_DESTINATION="$destination"
 if [[ -n "${GITHUB_ENV:-}" ]]; then
   echo "IOS_DESTINATION=${destination}" >>"$GITHUB_ENV"
