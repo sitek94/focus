@@ -1,6 +1,6 @@
 import CSQLite
 
-/// SQLite-backed persistence seam (schema and store land in a later checkpoint).
+/// Portable Focus persistence module marker and CSQLite link probe.
 public enum FocusPersistenceModule {
   public static let moduleName = "FocusPersistence"
 
