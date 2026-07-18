@@ -56,7 +56,11 @@ let package = Package(
     ),
     .testTarget(
       name: "FocusPersistenceIntegrationTests",
-      dependencies: ["FocusPersistence", "FocusSession"],
+      dependencies: [
+        "FocusPersistence",
+        "FocusSession",
+        "CSQLite",
+      ],
       path: "Tests/FocusPersistenceIntegrationTests"
     ),
     .testTarget(
@@ -66,7 +70,11 @@ let package = Package(
     ),
     .testTarget(
       name: "FocusCLIIntegrationTests",
-      dependencies: ["FocusControl", "FocusSession"],
+      dependencies: [
+        "FocusControl",
+        "FocusSession",
+        "FocusCLI",
+      ],
       path: "Tests/FocusCLIIntegrationTests"
     ),
     .testTarget(
