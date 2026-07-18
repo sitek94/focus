@@ -69,6 +69,33 @@ Two premises in the brief changed upstream:
 | Sparkle | [Sparkle 2.9.4](https://github.com/sparkle-project/Sparkle/tree/b6496a74a087257ef5e6da1c5b29a447a60f5bd7), [programmatic setup](https://sparkle-project.org/documentation/programmatic-setup/), [publishing](https://sparkle-project.org/documentation/publishing/), [sandboxing](https://sparkle-project.org/documentation/sandboxing/) |
 | Product-flow inspiration | [LookAway introduction](https://lookaway.com/docs/introduction/), [setup](https://lookaway.com/docs/setting-up/), [break-flow discussion](https://lookaway.com/blog/2025/04/07/how-i-made-break-reminders-less-annoying/) |
 
+### External-source session bootstrap
+
+At the beginning of every implementation or research session, read this plan, identify all
+external repositories needed by that session's checkpoints, and materialize them before
+doing dependent work:
+
+1. Clone each required repository under `./tmp/references/` in a unique directory containing
+   the source name and pinned SHA, such as
+   `tmp/references/avdlee-swiftui-agent-skill-f06d1437a3fb/`.
+2. Check out the exact full SHA from this plan in detached state. Verify the canonical remote,
+   `HEAD`, clean worktree, license file, and all required nested references/directories;
+   recurse submodules only when that source actually uses them.
+3. Reuse a clone only when remote, SHA, and clean state all match. Otherwise create a new
+   uniquely named clone. Never silently inspect a mutable default branch.
+4. Treat clones as read-only research inputs. Subagents must not commit or push from them.
+   Copy or materially adapt nothing until the license at that SHA and the required
+   notice/header path are verified.
+5. Keep a transient `tmp/references/sources.tsv` with URL, SHA, license, and purpose for the
+   session. Never stage `tmp/`; use explicit-path `git add` and inspect
+   `git diff --cached --name-only` before every commit.
+
+The three skill repositories selected in section 17 are mandatory bootstrap clones before
+authoring `.agents/skills/`. Clone CodexBar, Justsayit, XcodeGen, Sparkle, or another pinned
+reference whenever the active checkpoint needs source inspection beyond the conclusions
+already recorded here. SwiftPM dependency resolution alone is not sufficient when inspecting
+source or license terms, but unrelated references need not be cloned.
+
 ## 3. Toolchain and platform findings
 
 | Fact as of 2026-07-17 | Finding | Planning consequence |
@@ -152,7 +179,8 @@ Reference behavior is evidence, not authority. Official current platform/tool do
 └── .github/workflows/
 ```
 
-Generated `Focus.xcodeproj`, any generated workspace, `DerivedData`, and Xcode user data are ignored and never committed.
+Generated `Focus.xcodeproj`, any generated workspace, `DerivedData`, Xcode user data, and the
+entire `/tmp/` research tree are ignored and never committed.
 
 ### Target and identifier graph
 
@@ -662,6 +690,7 @@ Use one short-lived branch and one PR, with small reviewable commits/checkpoints
 
 | Checkpoint | Expected paths/responsibility | Exit proof |
 |---|---|---|
+| 0. Session bootstrap | transient `tmp/references/` clones for every external source needed by the active checkpoints | exact remote/SHA/license checks; `tmp/` ignored and absent from the staged diff |
 | 1. Contracts and licensing | `LICENSE`, `THIRD_PARTY_NOTICES.md`, `README.md`, `AGENTS.md`, `CHANGELOG.md`, `Makefile`, `.swift-format`, docs frontmatter tooling | `make docs-list`, license/provenance checks |
 | 2. Project graph and empty shells | `Package.swift`, `tools/projectgen/Package.swift`, `project.yml`, `Config/`, minimal `Apps/Focus/*`, `CLI/FocusCLI` | Linux generation; first Mac generate/build-both/archive gate |
 | 3. Deterministic session | `Sources/FocusSession`, `Tests/FocusSessionTests` | Full fixed-timing/state/reconciliation suite |
@@ -723,10 +752,32 @@ If the XcodeGen Mac gate fails, resolve it inside this PR by switching once to t
 | A42 | Private assets are never used as authenticated in-app feed | Public unauthenticated HTTP check of feed and enclosure; no token/static credential scan | ordinary CI |
 | A43 | Homebrew and website are absent/deferred | Workflow/repository static search | Linux |
 | A44 | Focus license/notices satisfy copied/adapted/pattern policy | `LICENSE`, notice, source-index, and file-header review | Linux |
+| A45 | Every needed external source was inspected from a pinned transient clone and no research clone is committed | Verify `tmp/references/sources.tsv`, each clone remote/HEAD/license, `.gitignore`, staged paths, and base-to-head diff | Linux |
 
 “Build passes,” “app launches,” and “a screenshot looks right” are insufficient evidence for the requirements that name stronger checks.
 
 ## 21. Risks, environment limits, and unresolved prerequisites
+
+### Remote execution and Mac handoff
+
+A future Cursor Cloud agent in an environment like this one can begin the implementation
+without any prior setup on Maciek's Mac. It can author every tracked file and fully verify
+the portable SwiftPM domain, SQLite persistence, CLI/control protocol, Linux socket
+integration, XcodeGen determinism, docs, skills, licenses, and CI/release definitions.
+
+The same implementation PR needs working GitHub-hosted `macos-26` Actions before its Apple
+work can be accepted: Xcode 26.6 must generate, build both apps, run Darwin integration and
+minimal UI smokes, and archive macOS. An interactive physical or remote Mac is still required
+for accessibility, real display/fullscreen behavior, Dockless behavior, login-item
+logout/login and revocation, App Translocation/CLI install, and signed Sparkle install/update
+acceptance.
+
+Local Mac initialization can therefore wait until the first interactive acceptance
+checkpoint. At that point install the plan-pinned stable Xcode on a compatible macOS, clone
+the repository, and run `make verify-apple`; no paid Apple account is needed for ordinary
+unsigned debug builds and simulator tests. Apple Developer membership, Developer ID/notary
+credentials, Sparkle private keys, a public feed, and TestFlight setup can wait until
+release-focused work.
 
 No product decision requires a question before implementation. The following gates remain explicit:
 
