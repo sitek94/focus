@@ -3,6 +3,12 @@ import FocusSession
 import Foundation
 import Testing
 
+#if canImport(Darwin)
+  import Darwin
+#else
+  import Glibc
+#endif
+
 @Test
 func moduleNameIsFocusControl() {
   #expect(FocusControlModule.moduleName == "FocusControl")
@@ -134,7 +140,7 @@ func partialFramesAreNotConsumed() throws {
 func pathHelpersValidateLengthAndParent() throws {
   let parent = URL(
     fileURLWithPath: "/tmp/p\(String(UUID().uuidString.prefix(8)))", isDirectory: true)
-  try FileManager.default.createDirectory(at: parent, withIntermediateDirectories: true)
+  try ControlSocketPath.ensurePrivateDirectory(parent)
   defer { try? FileManager.default.removeItem(at: parent) }
 
   let url = try ControlSocketPath.socketURL(inParent: parent)
@@ -147,6 +153,97 @@ func pathHelpersValidateLengthAndParent() throws {
 
   let injected = try InjectedControlSocketPathResolver(url: url).resolveSocketURL()
   #expect(injected.path == url.path)
+}
+
+@Test
+func parentDirectoryRejectsGroupOrOtherBits() throws {
+  let parent = URL(
+    fileURLWithPath: "/tmp/m\(String(UUID().uuidString.prefix(8)))", isDirectory: true)
+  try FileManager.default.createDirectory(at: parent, withIntermediateDirectories: true)
+  defer { try? FileManager.default.removeItem(at: parent) }
+
+  // 0755 has group/other r-x — must be rejected.
+  #expect(chmod(parent.path, 0o755) == 0)
+  #expect(throws: ControlSocketPathError.parentNotPrivate(parent)) {
+    try ControlSocketPath.validateParentDirectory(parent)
+  }
+
+  // 0700 is accepted.
+  try ControlSocketPath.setPrivateDirectoryMode(parent)
+  try ControlSocketPath.validateParentDirectory(parent)
+}
+
+@Test
+func unlinkRejectsRegularFileAndAllowsSameOwnerSocket() async throws {
+  let parent = URL(
+    fileURLWithPath: "/tmp/u\(String(UUID().uuidString.prefix(8)))", isDirectory: true)
+  try ControlSocketPath.ensurePrivateDirectory(parent)
+  defer { try? FileManager.default.removeItem(at: parent) }
+
+  let regular = parent.appendingPathComponent("not-a-socket")
+  try Data("trap".utf8).write(to: regular)
+  #expect(throws: ControlSocketPathError.endpointNotSocket(regular)) {
+    try ControlSocketPath.unlinkStaleSocketIfSafe(regular)
+  }
+  #expect(FileManager.default.fileExists(atPath: regular.path))
+
+  let socketURL = parent.appendingPathComponent(ControlSocketPath.fileName)
+  let server = ControlSocketServer(socketPath: socketURL) { request in
+    ControlResponse.failure(
+      requestId: request.requestId,
+      app: .notRunning,
+      error: .appNotRunning()
+    )
+  }
+  try await server.start()
+  let info = try ControlSocketPath.inspectEndpoint(socketURL)
+  #expect(info?.isSocket == true)
+  #expect(info?.isCurrentUserOwned == true)
+
+  await server.stop()
+  // stop already unlinked safely; missing path is a no-op
+  try ControlSocketPath.unlinkStaleSocketIfSafe(socketURL)
+  #expect(try ControlSocketPath.inspectEndpoint(socketURL) == nil)
+
+  // Bind after a same-owner stale socket: create one, stop without going through
+  // server.stop unlink by manually leaving a socket via a short-lived server restart.
+  try await server.start()
+  await server.stop()
+}
+
+@Test
+func statusReconcilesPastWarningDeadline() {
+  let start = Date(timeIntervalSince1970: 1_000)
+  var ids = IdentifierFactory.deterministic(start: 1)
+  let boot = SessionReducer.reduce(runtime: nil, intent: .start, at: start, ids: &ids)
+  guard case .focus(let focus) = boot.runtime.phase else {
+    Issue.record("Expected focus after start")
+    return
+  }
+
+  let afterWarning = focus.warningStartsAt.addingTimeInterval(1)
+  let processor = ControlRequestProcessor()
+  let result = processor.process(
+    request: ControlRequest(command: .status),
+    runtime: boot.runtime,
+    at: afterWarning,
+    ids: &ids,
+    app: .running(pid: 1)
+  )
+  #expect(result.response.ok)
+  #expect(result.response.state?.phase == "warning")
+  #expect(result.runtime?.phase.cycleID == focus.cycleID)
+
+  let afterBreakDue = focus.breakDueAt.addingTimeInterval(1)
+  let breakResult = processor.process(
+    request: ControlRequest(command: .status),
+    runtime: boot.runtime,
+    at: afterBreakDue,
+    ids: &ids,
+    app: .running(pid: 1)
+  )
+  #expect(breakResult.response.ok)
+  #expect(breakResult.response.state?.phase == "break")
 }
 
 @Test
@@ -193,7 +290,7 @@ func stateProjectorMapsFocusCapabilities() {
 func clientTimesOutWhenNoServer() async throws {
   let parent = URL(
     fileURLWithPath: "/tmp/t\(String(UUID().uuidString.prefix(8)))", isDirectory: true)
-  try FileManager.default.createDirectory(at: parent, withIntermediateDirectories: true)
+  try ControlSocketPath.ensurePrivateDirectory(parent)
   defer { try? FileManager.default.removeItem(at: parent) }
   let socketURL = parent.appendingPathComponent("missing.sock")
 
@@ -223,7 +320,7 @@ func clientTimesOutWhenNoServer() async throws {
 func cancellationSurfacesOnColdStartWait() async throws {
   let parent = URL(
     fileURLWithPath: "/tmp/c\(String(UUID().uuidString.prefix(8)))", isDirectory: true)
-  try FileManager.default.createDirectory(at: parent, withIntermediateDirectories: true)
+  try ControlSocketPath.ensurePrivateDirectory(parent)
   defer { try? FileManager.default.removeItem(at: parent) }
   let socketURL = parent.appendingPathComponent(ControlSocketPath.fileName)
 

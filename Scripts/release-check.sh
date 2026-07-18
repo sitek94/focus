@@ -87,8 +87,16 @@ else
 fi
 
 # Public feed / Sparkle configuration presence (values may still be placeholders).
-if ! grep -RFq "SUPublicEDKey" Apps Config project.yml 2>/dev/null; then
-  echo "release-check: note: SUPublicEDKey not wired into app sources yet (expected until Sparkle checkpoint)"
+placeholder_edkey="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+if grep -Fq "SUPublicEDKey: ${placeholder_edkey}" project.yml \
+  || grep -Fq "INFOPLIST_KEY_SUPublicEDKey: ${placeholder_edkey}" project.yml; then
+  if [[ "${FOCUS_REQUIRE_RELEASE_SECRETS:-0}" == "1" ]]; then
+    echo "error: SUPublicEDKey is still the all-zero placeholder; replace before a real release" >&2
+    exit 1
+  fi
+  echo "release-check: note: SUPublicEDKey is the documented all-zero placeholder (ok until release prep)"
+elif ! grep -RFq "SUPublicEDKey" Apps Config project.yml 2>/dev/null; then
+  echo "release-check: note: SUPublicEDKey not wired into app sources yet"
 fi
 
 feed_url="https://github.com/sitek94/focus/releases/latest/download/appcast.xml"

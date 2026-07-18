@@ -12,6 +12,8 @@ final class FocusRuntimeOwner {
   private(set) var presentation: PresentationDirective = .none
   private(set) var lastCommandResult: SessionCommandResult = .performed
   private(set) var isBootstrapped = false
+  /// Set when snapshot load fails; bootstrap does not invent a fresh session over evidence.
+  private(set) var bootstrapError: String?
 
   private var ids: IdentifierFactory
   private let clock: any WallClock
@@ -84,7 +86,11 @@ final class FocusRuntimeOwner {
         runtime = snapshot
       }
     } catch {
-      runtime = nil
+      // Corrupt/unreadable snapshot: keep nil runtime and surface the failure.
+      // Do not reconcile into a fresh session that would overwrite evidence.
+      bootstrapError = String(describing: error)
+      await startControlListener()
+      return
     }
 
     await send(.reconcile)
@@ -129,6 +135,17 @@ final class FocusRuntimeOwner {
     if let next = result.runtime {
       let mutated = previous != next || !result.events.isEmpty
       if mutated {
+        do {
+          try await store.commit(snapshot: next, events: result.events)
+        } catch {
+          // Do not report success or mutate in-memory authority when disk commit fails.
+          return ControlResponse.failure(
+            requestId: request.requestId,
+            app: app,
+            error: .internalError(message: "Failed to persist session state."),
+            state: previous.map { ControlStateProjector.project(runtime: $0, at: now) }
+          )
+        }
         let directive = Self.presentation(for: next.phase)
         runtime = next
         presentation = directive
@@ -137,11 +154,6 @@ final class FocusRuntimeOwner {
             result.response.result?.performed == true ? .performed : .noop
         } else {
           lastCommandResult = .rejected(.invalidForPhase)
-        }
-        do {
-          try await store.commit(snapshot: next, events: result.events)
-        } catch {
-          // Persistence failure must not leave the IPC peer without a response.
         }
         await applyPresentation(directive)
         rescheduleWake()
@@ -233,14 +245,16 @@ final class FocusRuntimeOwner {
   // MARK: - Private
 
   private func apply(_ reduction: SessionReduction) async {
-    runtime = reduction.runtime
-    presentation = reduction.presentation
-    lastCommandResult = reduction.commandResult
     do {
       try await store.commit(snapshot: reduction.runtime, events: reduction.events)
     } catch {
-      // Keep in-memory authority even if disk write fails; next commit retries.
+      // Leave prior runtime/presentation untouched when persistence fails.
+      lastCommandResult = .rejected(.invalidForPhase)
+      return
     }
+    runtime = reduction.runtime
+    presentation = reduction.presentation
+    lastCommandResult = reduction.commandResult
     await applyPresentation(reduction.presentation)
     rescheduleWake()
   }

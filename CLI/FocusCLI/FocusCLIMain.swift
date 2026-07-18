@@ -52,7 +52,7 @@ enum FocusCLIMain {
       if server != nil { return }
       let url = URL(fileURLWithPath: socketPath)
       let parent = url.deletingLastPathComponent()
-      try FileManager.default.createDirectory(at: parent, withIntermediateDirectories: true)
+      try ControlSocketPath.ensurePrivateDirectory(parent)
 
       let server = ControlSocketServer(socketPath: url) { [weak self] request in
         guard let self else {

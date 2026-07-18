@@ -27,12 +27,17 @@ echo "verify-signed-tag: found ${TAG} -> $(git rev-list -n 1 "refs/tags/${TAG}")
 
 POLICY="Config/git-allowed-signers"
 if [[ ! -f "$POLICY" ]]; then
+  if [[ "${FOCUS_REQUIRE_SIGNED_TAG:-0}" == "1" ]]; then
+    echo "error: ${POLICY} is required when FOCUS_REQUIRE_SIGNED_TAG=1 (refusing unsigned-tag release)" >&2
+    exit 1
+  fi
   cat <<EOF
 verify-signed-tag: PLACEHOLDER
   No ${POLICY} policy file is checked in yet.
   When Maciek adds SSH/GPG allowed signers, this script will verify the tag
   signature against that policy (git verify-tag / ssh key allowedSignersFile).
   Continuing without cryptographic verification for foundation CI wiring.
+  Set FOCUS_REQUIRE_SIGNED_TAG=1 to fail closed (release workflow).
 EOF
   exit 0
 fi

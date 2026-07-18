@@ -75,6 +75,19 @@ final class FocusMacIntegrationTests: XCTestCase {
     XCTAssertNil(identity)
   }
 
+  func testCurrentDisplaysFailsOpenWhenScreenNumberMissing() {
+    // Missing NSScreenNumber must not be silently skipped (under-cover).
+    // `currentDisplays` throws `.missingDisplayIdentity`; the optional seam
+    // returns nil so coordinators can treat it as a topology error.
+    XCTAssertNil(DisplayIdentity.from(deviceDescription: [:], frame: .zero))
+    switch OverlayError.missingDisplayIdentity {
+    case .missingDisplayIdentity:
+      break
+    case .noDisplays, .windowConstructionFailed:
+      XCTFail("Unexpected overlay error case")
+    }
+  }
+
   func testControlMailboxForwardsToMainActorHandler() async {
     let expected = ControlRequest(command: .status)
     let mailbox = ControlMailbox { request in

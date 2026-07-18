@@ -20,6 +20,12 @@ public enum ControlSocketPathError: Error, Sendable, Equatable {
   case parentNotPrivate(URL)
   case missingInjectedPath
   case darwinTempDirectoryUnavailable
+  /// Path exists but is not a Unix-domain socket (server must not unlink it).
+  case endpointNotSocket(URL)
+  /// Path exists but is not owned by the current UID (server must not unlink it).
+  case endpointNotOwnedByCurrentUser(URL)
+  case unlinkFailed(URL, errno: Int32)
+  case lstatFailed(URL, errno: Int32)
 }
 
 /// Shared socket filename and path rules (PLAN §8).
@@ -47,33 +53,45 @@ public enum ControlSocketPath: Sendable {
   }
 
   /// Require `parent` to be a private directory owned by the current UID.
+  ///
+  /// Uses `lstat` (does not follow symlinks). Privacy means no group/other
+  /// read/write/execute bits: `(mode & 0o077) == 0`.
   public static func validateParentDirectory(_ parent: URL) throws {
-    var isDirectory: ObjCBool = false
-    guard
-      FileManager.default.fileExists(
-        atPath: parent.path,
-        isDirectory: &isDirectory
-      ), isDirectory.boolValue
-    else {
-      if FileManager.default.fileExists(atPath: parent.path) {
-        throw ControlSocketPathError.parentNotDirectory(parent)
+    var info = stat()
+    let result = lstat(parent.path, &info)
+    guard result == 0 else {
+      if errno == ENOENT {
+        throw ControlSocketPathError.parentMissing(parent)
       }
-      throw ControlSocketPathError.parentMissing(parent)
+      throw ControlSocketPathError.lstatFailed(parent, errno: errno)
     }
 
-    let attrs = try FileManager.default.attributesOfItem(atPath: parent.path)
-    if let owner = attrs[.ownerAccountID] as? NSNumber {
-      let current = getuid()
-      guard owner.uint32Value == current else {
-        throw ControlSocketPathError.parentNotOwnedByCurrentUser(parent)
-      }
+    guard (info.st_mode & S_IFMT) == S_IFDIR else {
+      throw ControlSocketPathError.parentNotDirectory(parent)
     }
-    if let posix = attrs[.posixPermissions] as? NSNumber {
-      let mode = mode_t(posix.uint16Value)
-      // Reject group/other write — require a private directory.
-      if mode & S_IWGRP != 0 || mode & S_IWOTH != 0 {
-        throw ControlSocketPathError.parentNotPrivate(parent)
-      }
+    guard info.st_uid == getuid() else {
+      throw ControlSocketPathError.parentNotOwnedByCurrentUser(parent)
+    }
+    // Reject any group/other access bits (0700-style privacy).
+    guard (info.st_mode & mode_t(0o077)) == 0 else {
+      throw ControlSocketPathError.parentNotPrivate(parent)
+    }
+  }
+
+  /// Ensure `directory` exists as a current-UID `0700` directory (for servers/tests).
+  public static func ensurePrivateDirectory(_ directory: URL) throws {
+    let fm = FileManager.default
+    if !fm.fileExists(atPath: directory.path) {
+      try fm.createDirectory(at: directory, withIntermediateDirectories: true)
+    }
+    try setPrivateDirectoryMode(directory)
+    try validateParentDirectory(directory)
+  }
+
+  /// Force POSIX mode `0700` on an existing directory.
+  public static func setPrivateDirectoryMode(_ directory: URL) throws {
+    if chmod(directory.path, mode_t(0o700)) != 0 {
+      throw ControlSocketPathError.lstatFailed(directory, errno: errno)
     }
   }
 
@@ -92,6 +110,62 @@ public enum ControlSocketPath: Sendable {
     let parent = url.deletingLastPathComponent()
     try validateParentDirectory(parent)
     return url
+  }
+
+  /// `lstat` the endpoint. Returns `nil` when the path does not exist.
+  public static func inspectEndpoint(_ url: URL) throws -> EndpointInfo? {
+    var info = stat()
+    let result = lstat(url.path, &info)
+    guard result == 0 else {
+      if errno == ENOENT {
+        return nil
+      }
+      throw ControlSocketPathError.lstatFailed(url, errno: errno)
+    }
+    return EndpointInfo(
+      url: url,
+      isSocket: (info.st_mode & S_IFMT) == S_IFSOCK,
+      ownerUID: info.st_uid
+    )
+  }
+
+  /// Unlink a stale endpoint only when it is a same-owner Unix socket.
+  ///
+  /// No-op when the path is absent. Throws when a non-socket or foreign-owned
+  /// path occupies the location — callers must not remove those.
+  public static func unlinkStaleSocketIfSafe(_ url: URL) throws {
+    guard let endpoint = try inspectEndpoint(url) else {
+      return
+    }
+    guard endpoint.isSocket else {
+      throw ControlSocketPathError.endpointNotSocket(url)
+    }
+    guard endpoint.ownerUID == getuid() else {
+      throw ControlSocketPathError.endpointNotOwnedByCurrentUser(url)
+    }
+    if unlink(url.path) != 0 {
+      if errno == ENOENT {
+        return
+      }
+      throw ControlSocketPathError.unlinkFailed(url, errno: errno)
+    }
+  }
+
+  /// Metadata from a non-following `lstat` of a control endpoint path.
+  public struct EndpointInfo: Sendable, Equatable {
+    public var url: URL
+    public var isSocket: Bool
+    public var ownerUID: uid_t
+
+    public init(url: URL, isSocket: Bool, ownerUID: uid_t) {
+      self.url = url
+      self.isSocket = isSocket
+      self.ownerUID = ownerUID
+    }
+
+    public var isCurrentUserOwned: Bool {
+      ownerUID == getuid()
+    }
   }
 }
 

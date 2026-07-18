@@ -35,8 +35,7 @@ public actor ControlSocketServer {
   public func start() throws {
     guard !isRunning else { return }
     let parent = socketPath.deletingLastPathComponent()
-    try FileManager.default.createDirectory(at: parent, withIntermediateDirectories: true)
-    try ControlSocketPath.validateParentDirectory(parent)
+    try ControlSocketPath.ensurePrivateDirectory(parent)
     try ControlSocketPath.validatePathLength(socketPath.path)
 
     let fd = try UnixSocketIO.makeStreamSocket()
@@ -63,7 +62,8 @@ public actor ControlSocketServer {
       close(listenFD)
       listenFD = -1
     }
-    try? FileManager.default.removeItem(at: socketPath)
+    // Safe teardown: unlink only if the path is still our same-owner socket.
+    try? ControlSocketPath.unlinkStaleSocketIfSafe(socketPath)
   }
 
   deinit {

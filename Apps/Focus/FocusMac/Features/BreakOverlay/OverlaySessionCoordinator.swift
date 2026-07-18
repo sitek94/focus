@@ -84,7 +84,7 @@ final class OverlaySessionCoordinator {
   }
 
   private func reconcileDisplaysThrowing() throws {
-    let current = DisplayIdentity.currentDisplays()
+    let current = try DisplayIdentity.currentDisplays()
     guard !current.isEmpty else {
       throw OverlayError.noDisplays
     }
@@ -162,5 +162,7 @@ final class OverlaySessionCoordinator {
 
 enum OverlayError: Error {
   case noDisplays
+  /// A connected screen lacked `NSScreenNumber` — refuse to under-cover.
+  case missingDisplayIdentity
   case windowConstructionFailed
 }

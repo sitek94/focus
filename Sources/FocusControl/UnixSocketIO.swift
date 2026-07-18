@@ -128,7 +128,13 @@ enum UnixSocketIO {
   }
 
   static func bindListen(fd: Int32, path: String) throws {
-    try? FileManager.default.removeItem(atPath: path)
+    // Only the server may clear a stale endpoint, and only after verifying it is
+    // a same-owner Unix socket (never a regular file or foreign-owned path).
+    do {
+      try ControlSocketPath.unlinkStaleSocketIfSafe(URL(fileURLWithPath: path))
+    } catch let pathError as ControlSocketPathError {
+      throw ControlTransportError.path(pathError)
+    }
     do {
       try withUnixAddress(path: path) { address, length in
         if posixBind(fd, address, length) != 0 {

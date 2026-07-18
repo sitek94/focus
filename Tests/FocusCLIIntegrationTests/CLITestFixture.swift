@@ -28,7 +28,7 @@ actor CLITestFixture {
 
   func start(withInitialStart: Bool = true) async throws {
     let parent = socketURL.deletingLastPathComponent()
-    try FileManager.default.createDirectory(at: parent, withIntermediateDirectories: true)
+    try ControlSocketPath.ensurePrivateDirectory(parent)
 
     let server = ControlSocketServer(socketPath: socketURL) { [weak self] request in
       guard let self else {
@@ -134,7 +134,7 @@ func makeTempSocketURL() throws -> URL {
   // Keep under Darwin's 104-byte sun_path limit used by ControlSocketPath.
   let parent = URL(
     fileURLWithPath: "/tmp/f\(String(UUID().uuidString.prefix(8)))", isDirectory: true)
-  try FileManager.default.createDirectory(at: parent, withIntermediateDirectories: true)
+  try ControlSocketPath.ensurePrivateDirectory(parent)
   let url = parent.appendingPathComponent(ControlSocketPath.fileName)
   try ControlSocketPath.validatePathLength(url.path)
   return url

@@ -65,10 +65,14 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Verify signed tag policy (placeholder until Config/git-allowed-signers exists)
+      - name: Verify signed tag (fails closed without Config/git-allowed-signers)
+        env:
+          FOCUS_REQUIRE_SIGNED_TAG: "1"
         run: ./Scripts/verify-signed-tag.sh "${FOCUS_RELEASE_TAG}"
 
       - name: Version / changelog / marketing version checks
+        env:
+          FOCUS_REQUIRE_RELEASE_SECRETS: "1"
         run: make release-check VERSION="${FOCUS_RELEASE_VERSION}"
 
       - name: Log Apple toolchain / runner image

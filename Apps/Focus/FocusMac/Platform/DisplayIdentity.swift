@@ -27,7 +27,18 @@ struct DisplayIdentity: Hashable, Sendable {
     )
   }
 
-  static func currentDisplays(screens: [NSScreen] = NSScreen.screens) -> [DisplayIdentity] {
-    screens.compactMap { from(screen: $0) }
+  /// All current displays, or a topology error if any screen lacks `NSScreenNumber`.
+  ///
+  /// Fail-open: never silently under-cover by skipping unidentified screens.
+  static func currentDisplays(screens: [NSScreen] = NSScreen.screens) throws -> [DisplayIdentity] {
+    var identities: [DisplayIdentity] = []
+    identities.reserveCapacity(screens.count)
+    for screen in screens {
+      guard let identity = from(screen: screen) else {
+        throw OverlayError.missingDisplayIdentity
+      }
+      identities.append(identity)
+    }
+    return identities
   }
 }

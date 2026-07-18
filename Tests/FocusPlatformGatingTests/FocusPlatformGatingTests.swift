@@ -55,7 +55,7 @@ func peerAndLaunchSeamsAreInjectable() throws {
 func defaultSocketResolverHonorsDebugInjection() throws {
   let parent = URL(
     fileURLWithPath: "/tmp/g\(String(UUID().uuidString.prefix(8)))", isDirectory: true)
-  try FileManager.default.createDirectory(at: parent, withIntermediateDirectories: true)
+  try ControlSocketPath.ensurePrivateDirectory(parent)
   defer { try? FileManager.default.removeItem(at: parent) }
   let socket = parent.appendingPathComponent(ControlSocketPath.fileName)
 

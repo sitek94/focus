@@ -255,7 +255,7 @@ actor WarningSeededFixture {
 
   func start() async throws {
     let parent = socketURL.deletingLastPathComponent()
-    try FileManager.default.createDirectory(at: parent, withIntermediateDirectories: true)
+    try ControlSocketPath.ensurePrivateDirectory(parent)
     let server = ControlSocketServer(socketPath: socketURL) { [weak self] request in
       guard let self else {
         return ControlResponse.failure(

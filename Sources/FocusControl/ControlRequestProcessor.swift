@@ -52,7 +52,14 @@ public struct ControlRequestProcessor: Sendable {
           runtime: nil
         )
       }
-      let state = ControlStateProjector.project(runtime: runtime, at: now)
+      // Reconcile before projecting so status reflects elapsed deadlines (A10/A26).
+      let reduction = SessionReducer.reduce(
+        runtime: runtime,
+        intent: .reconcile,
+        at: now,
+        ids: &ids
+      )
+      let state = ControlStateProjector.project(runtime: reduction.runtime, at: now)
       return ProcessResult(
         response: ControlResponse.success(
           requestId: request.requestId,
@@ -61,7 +68,8 @@ public struct ControlRequestProcessor: Sendable {
           app: app,
           state: state
         ),
-        runtime: runtime
+        runtime: reduction.runtime,
+        events: reduction.events
       )
 
     case .start, .pause, .resume, .skip, .triggerBreak, .snooze:
