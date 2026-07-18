@@ -19,9 +19,10 @@ description: >
 
 ## Read first
 
-1. `docs/releasing.md` — versioning, tag policy, `make release-check`, CI vs release workflows.
-2. `docs/sparkle.md` — Sparkle 2.9.4 pin, Ed25519 key split, appcast hosting, update smoke expectations.
-3. `THIRD_PARTY_NOTICES.md` — Sparkle notice obligations when shipping.
+1. `docs/release-macos.md` — versioning, tag policy, checklist, `make release-check`, CI vs release workflows.
+2. `docs/release-ios.md` — iOS release path (TODO, not yet implemented); why the iOS shell never ships from `release.yml`.
+3. `docs/sparkle.md` — Sparkle 2.9.4 pin, Ed25519 key split, appcast hosting, update smoke expectations.
+4. `THIRD_PARTY_NOTICES.md` — Sparkle notice obligations when shipping.
 
 ## Exact checks
 
@@ -30,15 +31,8 @@ make release-check VERSION=x.y.z   # no publish
 make docs-list
 ```
 
-Before cutting a tag:
-
-1. `CHANGELOG.md` section matches `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` and tag `vX.Y.Z`.
-2. `make release-check VERSION=x.y.z` passes.
-3. Owner signs the tag locally; no tag-signing private key in repository secrets.
-4. Push the signed tag, then run `.github/workflows/release.yml` with the `tag` input.
-5. Confirm draft GitHub Release (DMG then `appcast.xml`) only when signing secrets produced a signed DMG.
-6. Clean-Mac install/update smoke, then publish the draft.
-7. Never ship the iOS shell (`ipa` / iOS artifacts forbidden).
+`docs/release-macos.md` owns the current tag/release checklist; read it before
+cutting a tag rather than following a copy here.
 
 ## Secret safety
 
@@ -51,4 +45,4 @@ Before cutting a tag:
 
 - Homebrew taps/casks (Focus v1 does not ship Homebrew).
 - Owner machine paths, personal credential locators, or private release vaults.
-- Interactive notarization debugging beyond what `docs/releasing.md` and the release scripts already describe.
+- Interactive notarization debugging beyond what `docs/release-macos.md` and the release scripts already describe.

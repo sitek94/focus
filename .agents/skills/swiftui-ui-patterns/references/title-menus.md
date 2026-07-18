@@ -8,6 +8,7 @@ Use a title menu in the navigation bar to provide context‑specific filtering o
 
 - Use `ToolbarTitleMenu` to attach a menu to the navigation title.
 - Keep the menu content compact and grouped with dividers.
+- Prefer `.toolbarTitleDisplayMode(.inline)` over the iOS-only `.navigationBarTitleDisplayMode(.inline)` for cross-platform code (iOS 17+/macOS 14+; no visible effect on macOS).
 
 ## Example: title menu for filters
 
@@ -61,7 +62,7 @@ struct TimelineScreen: View {
             Button("Federated") { timeline = .federated }
           }
         }
-        .navigationBarTitleDisplayMode(.inline)
+        .toolbarTitleDisplayMode(.inline)
     }
   }
 }

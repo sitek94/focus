@@ -99,6 +99,7 @@ struct AppView: View {
 - Route selection changes through `updateTab` to handle special tabs and scroll-to-top behavior.
 - Use `TabSection` + `.tabPlacement(.sidebarOnly)` for sidebar structure.
 - Use `.tabPlacement(.pinned)` in `AppTab.tabPlacement` for a single pinned tab; this is commonly used for iOS 26 `.searchable` tab content, but can be used for any tab.
+- Give every `Tab`/`tabItem` a text label even when the icon feels self-explanatory; `Tab(value:label:)` and `.tabItem` already expose that label to VoiceOver, so avoid icon-only labels that lose their accessible name.
 
 ## Dynamic tabs pattern
 
@@ -109,6 +110,7 @@ struct AppView: View {
 ## Pitfalls
 
 - Avoid adding ViewModels for tabs; keep state local or in `@Observable` services.
-- Do not nest `@Observable` objects inside other `@Observable` objects.
+- Avoid deep read-through chains such as `appState.account.profile.name` across nested `@Observable` models; observation and ownership become hard to reason about. A parent may still own distinct observable submodels when each is injected separately into the views that consume it.
 - Ensure `AppTab.id` values are stable; dynamic cases should hash on stable IDs.
 - Special tabs (compose) should not change selection.
+- For dynamic/data-sourced tabs, make sure `label` produces a real accessible name derived from the underlying data (e.g., the filter's title), not just an icon.

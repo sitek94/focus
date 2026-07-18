@@ -28,7 +28,8 @@ required_files=(
   project.yml
   Package.swift
   Config/Shared.xcconfig
-  docs/releasing.md
+  docs/release-macos.md
+  docs/release-ios.md
   docs/sparkle.md
 )
 for path in "${required_files[@]}"; do

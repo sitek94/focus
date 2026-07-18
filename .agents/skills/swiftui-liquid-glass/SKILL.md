@@ -1,12 +1,17 @@
 ---
 name: swiftui-liquid-glass
-description: Implement, review, or improve SwiftUI features using the iOS 26+ Liquid Glass API. Use when asked to adopt Liquid Glass in new SwiftUI UI, refactor an existing feature to Liquid Glass, or review Liquid Glass usage for correctness, performance, and design alignment.
+description: Implement, review, or improve SwiftUI features using the iOS 26+ / macOS 26+ Liquid Glass API. Use when asked to adopt Liquid Glass in new SwiftUI UI, refactor an existing feature to Liquid Glass, or review Liquid Glass usage for correctness, performance, and design alignment.
 ---
 
 # SwiftUI Liquid Glass
 
 ## Overview
-Use this skill to build or review SwiftUI features that fully align with the iOS 26+ Liquid Glass API. Prioritize native APIs (`glassEffect`, `GlassEffectContainer`, glass button styles) and Apple design guidance. Keep usage consistent, interactive where needed, and performance aware.
+Use this skill to build or review SwiftUI features that fully align with the iOS 26+ / macOS 26+ Liquid Glass API. Prioritize native APIs (`glassEffect`, `GlassEffectContainer`, glass button styles) and Apple design guidance. Keep usage consistent, interactive where needed, and performance aware. Liquid Glass ships on both iOS and macOS (and iPadOS/visionOS); apply the same guidance on macOS, adjusting only for platform-specific containers (e.g. `NavigationSplitView` sidebars/inspectors) rather than treating this as iOS-only.
+
+## Availability first
+Before applying availability guidance, check the consuming app's minimum deployment target:
+- **Deployment target is iOS 26 / macOS 26 or later:** no availability shim is needed. Call Liquid Glass APIs unconditionally — skip `#available` checks and non-glass fallback code entirely.
+- **Deployment target is below iOS 26 / macOS 26:** gate every Liquid Glass call with `#available(iOS 26, macOS 26, *)` for an iOS/macOS app, adding other shipped platforms explicitly, and provide a sensible non-glass fallback for older OS versions.
 
 ## Workflow Decision Tree
 Choose the path that matches the request:
@@ -14,7 +19,7 @@ Choose the path that matches the request:
 ### 1) Review an existing feature
 - Inspect where Liquid Glass should be used and where it should not.
 - Verify correct modifier order, shape usage, and container placement.
-- Check for iOS 26+ availability handling and sensible fallbacks.
+- Confirm the app's deployment target, then check availability handling accordingly: `#available` gating and fallbacks only matter below an iOS/macOS 26 floor; flag them as unnecessary complexity on a 26+ floor.
 
 ### 2) Improve a feature using Liquid Glass
 - Identify target components for glass treatment (surfaces, chips, buttons, cards).
@@ -32,10 +37,10 @@ Choose the path that matches the request:
 - Apply `.glassEffect(...)` after layout and visual modifiers.
 - Use `.interactive()` for elements that respond to touch/pointer.
 - Keep shapes consistent across related elements for a cohesive look.
-- Gate with `#available(iOS 26, *)` and provide a non-glass fallback.
+- If the deployment target is below iOS/macOS 26, gate with `#available` and provide a non-glass fallback. If the deployment target is iOS/macOS 26+, call the APIs unconditionally with no shim.
 
 ## Review Checklist
-- **Availability**: `#available(iOS 26, *)` present with fallback UI.
+- **Availability**: below a 26 floor, `#available` gating is present with fallback UI; on a 26+ floor, confirm no unnecessary gating/fallback code was added.
 - **Composition**: Multiple glass views wrapped in `GlassEffectContainer`.
 - **Modifier order**: `glassEffect` applied after layout/appearance modifiers.
 - **Interactivity**: `interactive()` only where user interaction exists.
@@ -48,13 +53,23 @@ Choose the path that matches the request:
 - Use `.glassEffect(.regular.tint(...).interactive(), in: .rect(cornerRadius: ...))` as needed.
 - Use `.buttonStyle(.glass)` / `.buttonStyle(.glassProminent)` for actions.
 - Add morphing transitions with `glassEffectID` when hierarchy changes.
-- Provide fallback materials and visuals for earlier iOS versions.
+- Only provide fallback materials and visuals when the deployment target is below iOS/macOS 26; skip fallback code entirely on a 26+ floor.
 
 ## Quick Snippets
 Use these patterns directly and tailor shapes/tints/spacing.
 
+On an iOS/macOS 26+ deployment target, call the API directly with no shim:
+
 ```swift
-if #available(iOS 26, *) {
+Text("Hello")
+    .padding()
+    .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 16))
+```
+
+On a deployment target below iOS/macOS 26, gate with `#available` and provide a fallback:
+
+```swift
+if #available(iOS 26, macOS 26, *) {
     Text("Hello")
         .padding()
         .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 16))

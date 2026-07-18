@@ -28,7 +28,6 @@ Choose a track based on your goal:
 ## General rules to follow
 
 - Use modern SwiftUI state (`@State`, `@Binding`, `@Observable`, `@Environment`) and avoid unnecessary view models.
-- If the deployment target includes iOS 16 or earlier and cannot use the Observation API introduced in iOS 17, fall back to `ObservableObject` with `@StateObject` for root ownership, `@ObservedObject` for injected observation, and `@EnvironmentObject` only for truly shared app-level state.
 - Prefer composition; keep views small and focused.
 - Use async/await with `.task` and explicit loading/error states. For restart, cancellation, and debouncing guidance, read `references/async-state.md`.
 - Keep shared app services in `@Environment`, but prefer explicit initializer injection for feature-local dependencies and models. For root wiring patterns, read `references/app-wiring.md`.
@@ -46,10 +45,9 @@ Use the narrowest state tool that matches the ownership model:
 | --- | --- |
 | Local UI state owned by one view | `@State` |
 | Child mutates parent-owned value state | `@Binding` |
-| Root-owned reference model on iOS 17+ | `@State` with an `@Observable` type |
-| Child reads or mutates an injected `@Observable` model on iOS 17+ | Pass it explicitly as a stored property |
+| Root-owned reference model | `@State` with an `@Observable` type |
+| Child reads or mutates an injected `@Observable` model | Pass it explicitly as a stored property |
 | Shared app service or configuration | `@Environment(Type.self)` |
-| Legacy reference model on iOS 16 and earlier | `@StateObject` at the root, `@ObservedObject` when injected |
 
 Choose the ownership location first, then pick the wrapper. Do not introduce a reference model when plain value state is enough.
 

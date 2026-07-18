@@ -78,13 +78,16 @@ Focus links the OS/system SQLite library. No third-party SQLite wrapper is vendo
 
 Pinned through `tools/projectgen/Package.swift` for deterministic project generation.
 
-## Copied agent skills (verbatim)
+## Adapted agent skills (Dimillian/Skills)
 
-The skills below are verbatim copies from Dimillian/Skills.
+The skills below are adapted from Dimillian/Skills, not verbatim copies:
+broad, reusable modern SwiftUI/concurrency patterns are retained; unsafe,
+stale, invalid, or source-specific guidance was corrected or removed; and
+Codex-only metadata (`agents/openai.yaml`) was deleted.
 
 | Field | Value |
 |---|---|
-| Classification | copied (verbatim) |
+| Classification | adapted |
 | Upstream | https://github.com/Dimillian/Skills |
 | Commit | `05ba982bfeb0d77d3c97d4542b0ee15034d05f84` |
 | License | MIT |
@@ -119,7 +122,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-## Adapted agent skill
+## Adapted agent skill (Swift-Testing-Agent-Skill)
 
 The skill below substantially adapts, rather than verbatim-copies, its source.
 

@@ -9,7 +9,7 @@ Use `LazyVGrid` for icon pickers, media galleries, and dense visual selections w
 - Use `.adaptive` columns for layouts that should scale across device sizes.
 - Use multiple `.flexible` columns when you want a fixed column count.
 - Keep spacing consistent and small to avoid uneven gutters.
-- Use `GeometryReader` inside grid cells when you need square thumbnails.
+- Use `.aspectRatio(1, contentMode: .fit)` for square thumbnails; a flexible/adaptive column already provides the available width, so a `GeometryReader` per cell is unnecessary and adds layout cost.
 
 ## Example: adaptive icon grid
 
@@ -34,6 +34,8 @@ LazyVGrid(columns: columns, spacing: 6) {
       }
     }
     .buttonStyle(.plain)
+    .accessibilityLabel(icon.name)
+    .accessibilityAddTraits(icon.isSelected ? [.isButton, .isSelected] : [.isButton])
   }
 }
 ```
@@ -50,11 +52,8 @@ LazyVGrid(
   spacing: 4
 ) {
   ForEach(items) { item in
-    GeometryReader { proxy in
-      ThumbnailView(item: item)
-        .frame(width: proxy.size.width, height: proxy.size.width)
-    }
-    .aspectRatio(1, contentMode: .fit)
+    ThumbnailView(item: item)
+      .aspectRatio(1, contentMode: .fit)
   }
 }
 ```

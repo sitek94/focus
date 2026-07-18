@@ -27,7 +27,22 @@ Common fixes:
 - **Protocol conformance on main actor types**: make the conformance isolated (e.g., `extension Foo: @MainActor SomeProtocol`).
 - **Global/static state**: protect with `@MainActor` or move into an actor.
 - **Background work**: move expensive work into a `@concurrent` async function on a `nonisolated` type or use an `actor` to guard mutable state.
-- **Sendable errors**: prefer immutable/value types; add `Sendable` conformance only when correct; avoid `@unchecked Sendable` unless you can prove thread safety.
+- **Sendable errors**: prefer immutable/value types; add `Sendable` conformance only when correct.
+
+### 2b. Reject diagnostic-silencing patterns
+
+These APIs bypass or weaken the compiler's proof of isolation and data-race safety. They are not approved in this project as fixes for diagnostics:
+- `@unchecked Sendable`
+- `nonisolated(unsafe)`
+- `MainActor.assumeIsolated`
+- `@preconcurrency`
+
+An existing occurrence does not by itself prove that a race exists, but it must not be preserved merely to silence the compiler. Inspect the surrounding invariants, restructure the isolation or data flow first, and remove the escape rather than relying on an unchecked assertion.
+
+### 2c. Rejected patterns
+
+- **Mutable global singletons**: an unprotected `static let shared` (or a global `var`) holding mutable state is not a fix on its own. Isolate it to an actor or `@MainActor`, or better, remove the singleton and inject the dependency via `init`/environment.
+- **`Task.detached` for shared/actor state**: `Task.detached` does not inherit actor or task-local context, introduces an unstructured lifetime and cancellation boundary, and requires `Sendable` captures. A properly awaited call from a detached task into an actor is still serialized by that actor and is not automatically a race. Even so, detached tasks are not the normal fix for stateful or shared work. Prefer structured child tasks (`async let` or task groups), a context-inheriting `Task { }` when bridging synchronous code into the caller's isolation, or a `@concurrent` async function for explicit offloading.
 
 ### 3. Verify the fix
 
@@ -42,16 +57,18 @@ Common fixes:
 ```swift
 // Before: data-race warning because ViewModel is accessed from the main thread
 // but has no actor isolation
-class ViewModel: ObservableObject {
-    @Published var title: String = ""
+@Observable
+final class ViewModel {
+    var title: String = ""
     func load() { title = "Loaded" }
 }
 
 // After: annotate the whole type so all stored state and methods are
 // automatically isolated to the main actor
 @MainActor
-class ViewModel: ObservableObject {
-    @Published var title: String = ""
+@Observable
+final class ViewModel {
+    var title: String = ""
     func load() { title = "Loaded" }
 }
 ```
@@ -68,8 +85,7 @@ class Foo: SomeProtocol {
 
 // After: scope the conformance to @MainActor so the requirement is
 // satisfied inside the correct isolation context
-@MainActor
-extension Foo: SomeProtocol {
+extension Foo: @MainActor SomeProtocol {
     func protocolMethod() { /* safely accesses main-actor state */ }
 }
 ```
@@ -83,15 +99,9 @@ func processData(_ input: [Int]) -> [Int] {
     input.map { heavyTransform($0) }   // runs on main thread
 }
 
-// After: hop off the main actor for the heavy work, then return the result
-// The caller awaits the result and stays on its own actor
-nonisolated func processData(_ input: [Int]) async -> [Int] {
-    await Task.detached(priority: .userInitiated) {
-        input.map { heavyTransform($0) }
-    }.value
-}
-
-// Or, using a @concurrent async function (Swift 6.2+):
+// After: hop off the main actor using @concurrent (Swift 6.2+). The function
+// runs on the global concurrent executor; the caller awaits the result and
+// stays in its own isolation — no need to reach for Task.detached.
 @concurrent
 func processData(_ input: [Int]) async -> [Int] {
     input.map { heavyTransform($0) }

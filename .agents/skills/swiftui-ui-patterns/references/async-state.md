@@ -12,13 +12,21 @@ Use this pattern when a view loads data, reacts to changing input, or coordinate
 - Debounce or coalesce user-driven async work such as search before it fans out into repeated requests.
 - Keep UI-facing models and mutations main-actor-safe; do background work in services, then publish the result back to UI state.
 
+## `@Environment` needs an Observable reference
+
+`@Environment(Type.self)` resolves by type identity against a reference value that was inserted with `.environment(_:)`, so `Type` must be an `@Observable` class (or another type SwiftUI registers as an environment value). A plain closure-based client (see `references/lightweight-clients.md`) is a value-type struct and is not itself a valid `@Environment(Type.self)` key. Own the client inside an `@Observable` store or model, inject the *store*, and let the store call the client internally:
+
+```swift
+@Environment(ItemStore.self) private var store  // ItemStore is @Observable and owns an ItemClient
+```
+
 ## Example: load on appear
 
 ```swift
 struct DetailView: View {
   let id: String
   @State private var state: LoadState<Item> = .idle
-  @Environment(ItemClient.self) private var client
+  @Environment(ItemStore.self) private var store
 
   var body: some View {
     content
@@ -42,7 +50,7 @@ struct DetailView: View {
   private func load() async {
     state = .loading
     do {
-      state = .loaded(try await client.fetch(id: id))
+      state = .loaded(try await store.fetchItem(id: id))
     } catch is CancellationError {
       return
     } catch {
@@ -58,7 +66,7 @@ struct DetailView: View {
 struct SearchView: View {
   @State private var query = ""
   @State private var results: [ResultItem] = []
-  @Environment(SearchClient.self) private var client
+  @Environment(SearchStore.self) private var store
 
   var body: some View {
     List(results) { item in
@@ -72,7 +80,7 @@ struct SearchView: View {
         return
       }
       do {
-        results = try await client.search(query)
+        results = try await store.search(query)
       } catch is CancellationError {
         return
       } catch {
@@ -82,6 +90,8 @@ struct SearchView: View {
   }
 }
 ```
+
+Both `ItemStore` and `SearchStore` follow the store shape in `references/lightweight-clients.md`: an `@Observable` class that stores a plain closure-based client in `init` and exposes async methods the view calls directly.
 
 ## When to move work out of the view
 

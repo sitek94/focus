@@ -8,14 +8,17 @@ Use this pattern to keep networking or service dependencies simple and testable 
 - Enable easy stubbing in previews/tests.
 
 ## Minimal shape
+
+Mark each closure `@Sendable` and let the struct conform to `Sendable` so the client value can be transferred safely across isolation boundaries under Swift 6 strict concurrency. `@Sendable` constrains captures and permits safe transfer; it does not choose an executor or make the closure run in the background.
+
 ```swift
-struct SomeClient {
-    var fetchItems: (_ limit: Int) async throws -> [Item]
-    var search: (_ query: String, _ limit: Int) async throws -> [Item]
+struct SomeClient: Sendable {
+    var fetchItems: @Sendable (_ limit: Int) async throws -> [Item]
+    var search: @Sendable (_ query: String, _ limit: Int) async throws -> [Item]
 }
 
 extension SomeClient {
-    static func live(baseURL: URL = URL(string: "https://example.com")!) -> SomeClient {
+    static func live(baseURL: URL) -> SomeClient {
         let session = URLSession.shared
         return SomeClient(
             fetchItems: { limit in
@@ -28,6 +31,8 @@ extension SomeClient {
     }
 }
 ```
+
+The client can conform to `Sendable` because all of its stored closure values are `@Sendable`. Separately, values captured by those closures (`session`, `baseURL`) must satisfy sendability checks. When a call crosses an isolation boundary, its arguments and results — including `Item` — must also be safe to transfer.
 
 ## Usage pattern
 ```swift
@@ -48,6 +53,9 @@ extension SomeClient {
         do {
             items = try await client.fetchItems(limit)
             state = .loaded
+        } catch is CancellationError {
+            state = .idle
+            return
         } catch {
             state = .failed(error.localizedDescription)
         }
@@ -70,8 +78,16 @@ struct ContentView: View {
 
 ```swift
 @main
+@MainActor
 struct MyApp: App {
-    @State private var store = ItemsStore(client: .live())
+    @State private var store: ItemsStore
+
+    init() {
+        guard let baseURL = URL(string: "https://example.com") else {
+            preconditionFailure("The static API base URL is invalid")
+        }
+        _store = State(initialValue: ItemsStore(client: .live(baseURL: baseURL)))
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -91,3 +107,4 @@ struct MyApp: App {
 ## Pitfalls
 - Don’t put UI state in the client; keep state in the store.
 - Don’t capture `self` or view state in the client closures.
+- Don’t reach for `@unchecked Sendable` to silence a concurrency error on the client or its closures; fix the underlying capture (make the captured type `Sendable`, or move mutable state into an actor/store) instead of escaping the checker.

@@ -30,18 +30,10 @@ Materially rewritten to route agents to Focus’s suites and CI boundaries (`PLA
 
 ## Where tests live
 
-| Suite                              | Lane                | Covers                                                                  |
-| ---------------------------------- | ------------------- | ----------------------------------------------------------------------- |
-| `FocusSessionTests`                | Linux authoritative | Timing, transitions, pause/resume, catch-up, reconcile, fixed constants |
-| `FocusPersistenceIntegrationTests` | Linux authoritative | Schema, atomic snapshot+events, restore, corrupt snapshot               |
-| `FocusControlTests`                | Linux authoritative | Codable envelopes, framing, timeouts, path helpers                      |
-| `FocusCLIIntegrationTests`         | Linux authoritative | Real Unix socket fixture + CLI subprocess; all seven commands           |
-| `FocusPlatformGatingTests`         | Linux authoritative | No Apple-framework leaks into portable targets                          |
-| `FocusMacIntegrationTests`         | Mac CI              | Darwin socket, `getpeereid`, app handler, restart/timeout               |
-| `FocusMacUITests`                  | Mac CI              | Minimal launch / menu-bar smoke                                         |
-| `FocusIOSUITests`                  | Mac CI              | Minimal launch / root-scene smoke                                       |
-
-Commands: `make test-linux`, or focused `make test-session` / `test-persistence` / `test-control` / `test-cli` / `test-platform-gating`. Full policy: `docs/testing.md`.
+`docs/testing.md` owns the current suite-to-lane map and exact commands
+(`make test-linux`, focused `make test-session` / `test-persistence` /
+`test-control` / `test-cli` / `test-platform-gating`, plus the Mac CI lane).
+Read it before adding or naming a test target.
 
 ## Hard rules
 
@@ -52,7 +44,7 @@ Commands: `make test-linux`, or focused `make test-session` / `test-persistence`
 
 ## Review checklist
 
-1. New logic has a home in the table above (or a justified new suite name).
+1. New logic has a home in `docs/testing.md`'s suite map (or a justified new suite name).
 2. Linux-runnable cases stay free of AppKit/UIKit/SwiftUI imports.
 3. Async tests use injected clock / confirmations; no wall-clock sleeps.
 4. No screenshot assertions or golden image tooling added.

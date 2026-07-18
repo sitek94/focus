@@ -647,16 +647,17 @@ Every `docs/` page starts with `summary` and non-empty `read_when` frontmatter. 
 Skills hold reusable, approved engineering patterns; `docs/` owns Focus’s current
 architecture and product decisions. The current skill baseline is:
 
-- verbatim MIT copies of `swiftui-ui-patterns`, `swiftui-view-refactor`,
-  `swiftui-performance-audit`, `swift-concurrency-expert`, and
-  `swiftui-liquid-glass` from Dimillian/Skills at
-  `05ba982bfeb0d77d3c97d4542b0ee15034d05f84`;
+- `swiftui-ui-patterns`, `swiftui-view-refactor`, `swiftui-performance-audit`,
+  `swift-concurrency-expert`, and `swiftui-liquid-glass`, adapted from
+  Dimillian/Skills at `05ba982bfeb0d77d3c97d4542b0ee15034d05f84`;
 - the adapted `focus-testing` router; and
 - the Focus-authored `release-focus` router.
 
-Review copied skills visibly in follow-up commits: keep broadly useful modern
-patterns, remove rejected or stale guidance, and adapt only where Focus has an
-explicit rule. License notices remain in `THIRD_PARTY_NOTICES.md`; there is no
+The five Dimillian-sourced skills were reviewed against Phase 2 policy: broad,
+reusable modern SwiftUI/concurrency patterns are retained; unsafe, stale,
+invalid, or source-specific (Codex-only) guidance was corrected or removed;
+and Codex-only metadata (`agents/openai.yaml`) was deleted since Focus does
+not use Codex. License notices remain in `THIRD_PARTY_NOTICES.md`; there is no
 automated skill-provenance gate while the repository is private.
 
 ## 18. Licensing and attribution plan
@@ -674,7 +675,7 @@ Use these labels consistently:
 | Classification | Meaning | Obligation |
 |---|---|---|
 | copied | Verbatim code/text | Preserve required headers and license notice; record exact path and SHA |
-| adapted | Substantial source-derived rewrite | Add `Adapted from <URL>@<SHA>` header and upstream MIT notice |
+| adapted | Substantial source-derived rewrite | Record upstream URL, exact SHA/source paths, and the required MIT notice in `THIRD_PARTY_NOTICES.md` |
 | pattern/inspiration | Independently written implementation of a general idea/workflow | Cite in design/research docs when useful; do not imply copied authorship |
 
 CodexBar and Justsayit remain MIT pattern references unless implementation later copies material. LookAway contributes only a public workflow shape; never copy its words, branding, assets, screenshots, or visual design. XcodeGen is a development tool and Sparkle is a distributed dependency; distinguish those notice categories. Never copy material without a verified compatible license.

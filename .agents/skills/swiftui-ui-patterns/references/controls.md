@@ -28,9 +28,12 @@ Form {
 
 ```swift
 Section("Font Size") {
-  Slider(value: $fontSizeScale, in: 0.5...1.5, step: 0.1)
-  Text("Scale: \(String(format: \"%.1f\", fontSizeScale))")
-    .font(.scaledBody)
+  Slider(value: $fontSizeScale, in: 0.5...1.5, step: 0.1) {
+    Text("Font Size")
+  }
+  Text("Scale: \(fontSizeScale.formatted(.number.precision(.fractionLength(1))))")
+    .font(.subheadline)
+    .foregroundStyle(.secondary)
 }
 ```
 

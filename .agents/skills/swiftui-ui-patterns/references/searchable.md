@@ -10,6 +10,7 @@ Use `searchable` to add native search UI with optional scopes and async results.
 - Use `.searchScopes` for multiple search modes.
 - Use `.task(id: searchQuery)` or debounced tasks to avoid overfetching.
 - Show placeholders or progress states while results load.
+- For the canonical `.task(id:)` restart/cancellation lifecycle (what happens when the query changes mid-flight), see `async-state.md`; this page focuses on the debounce delay itself.
 
 ## Example: searchable with scopes
 
@@ -33,7 +34,6 @@ struct ExploreView: View {
     }
     .searchable(
       text: $searchQuery,
-      placement: .navigationBarDrawer(displayMode: .always),
       prompt: Text("Search")
     )
     .searchScopes($searchScope) {
@@ -51,13 +51,16 @@ struct ExploreView: View {
       results = []
       return
     }
+    try? await Task.sleep(for: .milliseconds(250))
+    guard !Task.isCancelled else { return }
     isSearching = true
     defer { isSearching = false }
-    try? await Task.sleep(for: .milliseconds(250))
     results = await fetchResults(query: searchQuery, scope: searchScope)
   }
 }
 ```
+
+The default placement keeps the example cross-platform. On an iOS-only screen that specifically needs a persistent navigation-bar search field, add `placement: .navigationBarDrawer(displayMode: .always)`.
 
 ## Design choices to keep
 
@@ -69,3 +72,4 @@ struct ExploreView: View {
 
 - Avoid running searches for empty strings.
 - Don’t block the main thread during fetch.
+- After a debounce `Task.sleep`, check `Task.isCancelled` before mutating state or fetching; `try?` swallows the cancellation error, so skipping this check lets a stale query run anyway. See `async-state.md` for the full restart/cancellation pattern.

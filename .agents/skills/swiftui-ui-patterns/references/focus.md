@@ -52,31 +52,39 @@ struct EditTagView: View {
 
 ## Example: dynamic focus for variable fields
 
+Appending a new field and focusing it in the same synchronous update can race the view rebuild that creates the new `TextField`. Rather than guessing at a delay with `DispatchQueue.main.asyncAfter`, record the desired focus target as state and apply it in `.onChange(of:)` once the field count has actually updated:
+
 ```swift
 struct PollView: View {
   enum FocusField: Hashable { case option(Int) }
   @FocusState private var focused: FocusField?
   @State private var options: [String] = ["", ""]
-  @State private var currentIndex = 0
+  @State private var pendingFocusIndex: Int?
 
   var body: some View {
-    ForEach(options.indices, id: \.self) { index in
-      TextField("Option \(index + 1)", text: $options[index])
-        .focused($focused, equals: .option(index))
-        .onSubmit { addOption(at: index) }
+    Form {
+      ForEach(options.indices, id: \.self) { index in
+        TextField("Option \(index + 1)", text: $options[index])
+          .focused($focused, equals: .option(index))
+          .onSubmit { addOption(after: index) }
+      }
     }
     .onAppear { focused = .option(0) }
+    .onChange(of: options.count) {
+      guard let pendingFocusIndex else { return }
+      focused = .option(pendingFocusIndex)
+      self.pendingFocusIndex = nil
+    }
   }
 
-  private func addOption(at index: Int) {
+  private func addOption(after index: Int) {
     options.append("")
-    currentIndex = index + 1
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-      focused = .option(currentIndex)
-    }
+    pendingFocusIndex = index + 1
   }
 }
 ```
+
+If a view instead needs to wait one run-loop turn on the same actor (no state to observe), prefer a structured `Task { await Task.yield(); focused = ... }` scoped to the view's lifetime over an arbitrary `asyncAfter` delay — it still hands control back to SwiftUI without guessing at a duration.
 
 ## Design choices to keep
 
@@ -87,4 +95,5 @@ struct PollView: View {
 ## Pitfalls
 
 - Don’t store focus state in shared objects; it is view-local.
-- Avoid aggressive focus changes during animation; delay if needed.
+- Avoid aggressive focus changes during animation.
+- Don't use `DispatchQueue.main.asyncAfter` with a guessed duration to "wait for" a view update; use `.onChange(of:)` on the state that actually changes, or `Task.yield()` inside a structured `Task`.

@@ -65,12 +65,16 @@ struct DetailSurface: View {
               proxy.scrollTo(target, anchor: .top)
             }
           }
+          .accessibilityLabel(revealProgress < 0.5 ? "Show details" : "Show primary content")
+          .accessibilityAddTraits(.isButton)
         }
       }
     }
   }
 }
 ```
+
+`clamped(to:)` above is not a system API — it's a small project-local `Comparable` extension (`func clamped(to range: ClosedRange<Self>) -> Self { min(max(self, range.lowerBound), range.upperBound) }`). Define it once per project and reuse it, or inline `min(max(offset / secondaryHeight, 0), 1)` if you'd rather not add a helper.
 
 ## Design choices to keep
 
@@ -79,6 +83,7 @@ struct DetailSurface: View {
 - Use `progress` to drive `offset`, `opacity`, `blur`, `scaleEffect`, and toolbar state so the whole surface stays synchronized.
 - Use `ScrollViewReader` for programmatic snapping from taps on the primary content or chevron affordances.
 - Use `onScrollTargetVisibilityChange` when you need a settled section state for haptics, tooltip dismissal, analytics, or accessibility announcements.
+- Give the chevron/pill affordance a real accessibility label and the `.isButton` trait so VoiceOver and Switch Control users have an explicit action to trigger the same transition, since paging-scroll gestures are not always easy to perform with assistive technologies.
 
 ## Morphing a shared control
 
@@ -126,8 +131,3 @@ This keeps the motion coherent and avoids duplicate-hit-target bugs.
 - Do not mix multiple animation sources for the same property. If `progress` drives it, keep other animations off that property.
 - Do not store derived state like `isSecondaryVisible` unless another API requires it. Prefer deriving it from `progress` or visible scroll targets.
 - Beware of layout feedback loops when measuring heights. Clamp zero values and update only when the measured height actually changes.
-
-## Concrete example
-
-- Pool iOS tile detail reveal: `/Users/dimillian/Documents/Dev/Pool/pool-ios/Pool/Sources/Features/Tile/Detail/TileDetailView.swift`
-- Secondary content anchor example: `/Users/dimillian/Documents/Dev/Pool/pool-ios/Pool/Sources/Features/Tile/Detail/TileDetailIntentListView.swift`

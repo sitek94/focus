@@ -2,7 +2,7 @@
 
 Distilled guidance for deciding whether a SwiftUI feature should stay as plain MV or introduce a view model.
 
-Inspired by the user's provided source, "SwiftUI in 2025: Forget MVVM" (Thomas Ricouard), but rewritten here as a practical refactoring reference.
+Inspired by "SwiftUI in 2025: Forget MVVM" (Thomas Ricouard), rewritten here as a practical refactoring reference.
 
 ## Default stance
 
@@ -55,7 +55,9 @@ struct FeedView: View {
             case .loading:
                 ProgressView("Loading feed...")
             case .error(let message):
-                ErrorStateView(message: message, retryAction: { await loadFeed() })
+                ErrorStateView(message: message, retryAction: {
+                    Task { await loadFeed() }
+                })
             case .loaded(let posts):
                 ForEach(posts) { post in
                     PostRowView(post: post)

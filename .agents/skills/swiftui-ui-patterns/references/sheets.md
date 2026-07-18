@@ -116,6 +116,7 @@ struct NavigationSheet<Content: View>: View {
 Keep dismissal and confirmation logic inside the sheet when the actions belong to the modal itself.
 
 ```swift
+@MainActor
 struct EditItemSheet: View {
   @Environment(\.dismiss) private var dismiss
   @Environment(Store.self) private var store

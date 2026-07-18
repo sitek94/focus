@@ -37,19 +37,23 @@ For SwiftPM, inspect Package.swift swiftSettings for the same flags.
 
 ## Common pitfalls
 
-- `Task.detached` ignores inherited actor context; avoid it unless you truly
-  need to break isolation.
+- `Task.detached` does not inherit actor or task-local context, introduces an
+  unstructured lifetime and cancellation boundary, and requires `Sendable`
+  captures. Properly awaited calls into an actor remain serialized and are not
+  automatically races, but detached tasks are still not the normal fix for
+  stateful or shared work. Prefer structured child tasks, a context-inheriting
+  `Task { }` bridge, or `@concurrent` for explicit offloading as appropriate.
 - Main-actor-by-default can hide performance issues if CPU-heavy work stays on
   the main actor; move that work into `@concurrent` async functions.
 
-## Keywords (from source cheat sheet)
+## Keywords (quick reference)
 
 | Keyword | What it does |
 | --- | --- |
 | `async` | Function can pause |
 | `await` | Pause here until done |
 | `Task { }` | Start async work, inherits context |
-| `Task.detached { }` | Start async work, no inherited context |
+| `Task.detached { }` | Start unstructured async work without inherited actor or task-local context |
 | `@MainActor` | Runs on main thread |
 | `actor` | Type with isolated mutable state |
 | `nonisolated` | Opts out of actor isolation |
@@ -60,4 +64,7 @@ For SwiftPM, inspect Package.swift swiftSettings for the same flags.
 
 ## Source
 
-https://fuckingapproachableswiftconcurrency.com/en/
+For the authoritative specification of these behaviors, consult the official
+Swift Evolution proposals and the Swift compiler/toolchain documentation for
+approachable concurrency and default actor isolation rather than relying on
+this summary alone.

@@ -40,7 +40,7 @@ Use this file to find component and cross-cutting guidance. Each entry lists whe
 ## Planned components (create files as needed)
 
 - Web content: create `references/webview.md` — Use for embedded web content or in-app browsing.
-- Status composer patterns: create `references/composer.md` — Use for composition or editor workflows.
+- Composer patterns: create `references/composer.md` — Use for composition or editor workflows.
 - Text input and validation: create `references/text-input.md` — Use for forms, validation, and text-heavy input.
 - Design system usage: create `references/design-system.md` — Use when applying shared styling rules.
 

@@ -11,6 +11,7 @@ Use `Form` for structured settings, grouped inputs, and action rows. This patter
 - Use `.scrollContentBackground(.hidden)` plus a custom background color when you need design-system colors.
 - Apply `.formStyle(.grouped)` for grouped styling when appropriate.
 - Use `@FocusState` to manage keyboard focus in input-heavy forms.
+- Use `.toolbarTitleDisplayMode(.inline)` instead of the iOS-only `.navigationBarTitleDisplayMode(.inline)`; it's cross-platform (iOS 17+/macOS 14+) though it has no visible effect on macOS.
 
 ## Example: settings-style form
 
@@ -34,7 +35,7 @@ struct SettingsView: View {
         .listRowBackground(theme.primaryBackgroundColor)
       }
       .navigationTitle("Settings")
-      .navigationBarTitleDisplayMode(.inline)
+      .toolbarTitleDisplayMode(.inline)
       .scrollContentBackground(.hidden)
       .background(theme.secondaryBackgroundColor)
     }
@@ -73,7 +74,7 @@ struct AddRemoteServerView: View {
       }
       .formStyle(.grouped)
       .navigationTitle("Add Server")
-      .navigationBarTitleDisplayMode(.inline)
+      .toolbarTitleDisplayMode(.inline)
       .scrollContentBackground(.hidden)
       .background(theme.secondaryBackgroundColor)
       .scrollDismissesKeyboard(.immediately)

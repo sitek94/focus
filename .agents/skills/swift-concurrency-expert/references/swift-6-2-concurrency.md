@@ -206,6 +206,17 @@ extension StickerModel: Exportable {
 
  This eliminates data-race safety errors about unsafe global and static variables, calls to other main actor functions like ones from the SDK, and more, because the main actor protects all mutable state by default. It also reduces concurrency annotations in code that’s mostly single-threaded. This mode is great for projects that do most of the work on the main actor, and concurrent code is encapsulated within specific types or files. It’s opt-in and it’s recommended for apps, scripts, and other executable targets.
 
+### Caveat: `.shared` is compiler-safe, not the approved pattern
+
+`@MainActor static let shared: Foo = .init()` (and main-actor-by-default doing
+the same implicitly) makes a singleton pass strict concurrency checking, but
+compiler-safe is not the same as approved. For new code, prefer constructor or
+environment injection of the dependency over adding another `.shared` global —
+injection keeps ownership explicit, keeps call sites testable, and avoids
+growing the set of globally reachable mutable state that every future
+concurrency review has to re-audit. Treat an existing `@MainActor`-protected
+`.shared` as tolerated legacy shape, not as a template to copy.
+
 ## Offloading work to the background
 
 Offloading work to the background is still important for performance, such as keeping apps responsive when performing CPU-intensive tasks.

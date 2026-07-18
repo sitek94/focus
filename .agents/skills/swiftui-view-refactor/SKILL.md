@@ -34,6 +34,7 @@ Refactor SwiftUI views toward small, explicit, stable view types. Default to van
 - Keep computed `some View` helpers rare and small. Do not build an entire screen out of `private var header: some View`-style fragments.
 - Pass small, explicit inputs (data, bindings, callbacks) into extracted subviews instead of handing down the entire parent state.
 - If an extracted subview becomes reusable or independently meaningful, move it to its own file.
+- Carry accessibility labels, identifiers, grouping, and VoiceOver/focus order along with the extracted code — see "Preserve accessibility during extraction" below.
 
 Prefer:
 
@@ -176,9 +177,14 @@ init(dependency: Dependency) {
 ```
 
 ### 6) Observation usage
-- For `@Observable` reference types on iOS 17+, store them as `@State` in the owning view.
+- For `@Observable` reference types, store them as `@State` in the owning view.
 - Pass observables down explicitly; avoid optional state unless the UI genuinely needs it.
-- If the deployment target includes iOS 16 or earlier, use `@StateObject` at the owner and `@ObservedObject` when injecting legacy observable models.
+
+### 7) Preserve accessibility during extraction
+- When extracting a section into a dedicated subview, carry over its existing `accessibilityLabel`, `accessibilityIdentifier`, `accessibilityHint`, and `accessibilityValue` modifiers rather than dropping them.
+- Preserve existing accessibility grouping (`accessibilityElement(children:)`, `accessibilityRepresentation`) so assistive technologies still see the same logical elements after the split.
+- Preserve VoiceOver/keyboard focus order (`accessibilitySortPriority`, `.focusable`, `.focused`, `.defaultFocus`, explicit navigation order) — extraction must not silently reorder how elements are announced or reached.
+- Treat any accessibility modifier as part of the section's behavior, not incidental styling: move it with the code it decorates, and flag it in review if it is unclear which extracted subview should own it.
 
 ## Workflow
 
@@ -187,8 +193,9 @@ init(dependency: Dependency) {
 3. Shorten long bodies by extracting dedicated subview types; avoid rebuilding the screen out of many computed `some View` helpers.
 4. Ensure stable view structure: avoid top-level `if`-based branch swapping; move conditions to localized sections/modifiers.
 5. If a view model exists or is explicitly required, replace optional view models with a non-optional `@State` view model initialized in `init`.
-6. Confirm Observation usage: `@State` for root `@Observable` models on iOS 17+, legacy wrappers only when the deployment target requires them.
-7. Keep behavior intact: do not change layout or business logic unless requested.
+6. Confirm Observation usage: `@State` for root `@Observable` models in the owning view.
+7. When extracting subviews, verify accessibility labels, identifiers, grouping, and VoiceOver/focus order carried over unchanged — do not let extraction silently drop or reorder them.
+8. Keep behavior intact: do not change layout or business logic unless requested.
 
 ## Notes
 
@@ -199,4 +206,4 @@ init(dependency: Dependency) {
 
 ## Large-view handling
 
-When a SwiftUI view file exceeds ~300 lines, split it aggressively. Extract meaningful sections into dedicated `View` types instead of hiding complexity in many computed properties. Use `private` extensions with `// MARK: -` comments for actions and helpers, but do not treat extensions as a substitute for breaking a giant screen into smaller view types. If an extracted subview is reused or independently meaningful, move it into its own file.
+A SwiftUI view that grows to several hundred lines is a review signal, not an automatic split threshold. Split where a section has meaningful state, behavior, dependencies, or ownership that can be expressed as a dedicated `View` type; do not extract code solely to reduce the line count. Avoid hiding complexity in many computed properties. Use `private` extensions with `// MARK: -` comments for cohesive actions and helpers, but do not treat extensions as a substitute for separating distinct responsibilities. If an extracted subview is reused or independently meaningful, move it into its own file.

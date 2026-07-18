@@ -2,7 +2,7 @@
 
 ## Overview
 
-Liquid Glass is a dynamic material introduced in iOS that combines the optical properties of glass with a sense of fluidity. It blurs content behind it, reflects color and light from surrounding content, and reacts to touch and pointer interactions in real time. This guide covers how to implement and customize Liquid Glass effects in SwiftUI applications. You should always seek guides on Liquid Glass when asked for help adopting new Apple design.
+Liquid Glass is a dynamic material introduced in iOS, iPadOS, macOS, and visionOS 26 that combines the optical properties of glass with a sense of fluidity. It blurs content behind it, reflects color and light from surrounding content, and reacts to touch and pointer interactions in real time. This guide covers how to implement and customize Liquid Glass effects in SwiftUI applications.
 
 Key features of Liquid Glass:
 - Blurs content behind the material
@@ -173,6 +173,38 @@ var body: some View {
 
 The morphing effect occurs when views with Liquid Glass appear or disappear due to view hierarchy changes.
 
+### Controlling the Transition with `glassEffectTransition`
+
+Use `.glassEffectTransition(_:)` to control how a glass effect animates in or out when its view is added to or removed from the hierarchy. Apply it to the view being inserted/removed (not to the always-present `GlassEffectContainer`):
+
+```swift
+@State private var isExpanded: Bool = false
+@Namespace private var namespace
+
+var body: some View {
+    GlassEffectContainer(spacing: 10.0) {
+        HStack(spacing: 10.0) {
+            Image(systemName: "pencil")
+                .frame(width: 20.0, height: 20.0)
+                .glassEffect()
+                .glassEffectID("pencil", in: namespace)
+
+            if isExpanded {
+                Image(systemName: "note")
+                    .frame(width: 20.0, height: 20.0)
+                    .glassEffect()
+                    .glassEffectID("note", in: namespace)
+                    .glassEffectTransition(.matchedGeometry)
+            }
+        }
+    }
+}
+```
+
+`GlassEffectTransition` options:
+- `.matchedGeometry` (default within container spacing) - morphs the shape to/from nearby glass effects.
+- `.materialize` - fades the glass material in/out without geometry matching; use for effects that are not spatially adjacent to another glass effect.
+
 ## Button Styling with Liquid Glass
 
 ### Glass Button Style
@@ -201,29 +233,56 @@ Button("Important Action") {
 
 ### Background Extension Effect
 
-To stretch content behind a sidebar or inspector with the background extension effect:
+`.backgroundExtensionEffect()` duplicates the view it's applied to into mirrored, blurred copies placed on any edge with available safe area, so the copies can act as a seamless background for content on top of them (for example, a detail image extending under a sidebar or inspector):
 
 ```swift
 NavigationSplitView {
     // Sidebar content
 } detail: {
-    // Detail content
-        .background {
-            // Background content that extends under the sidebar
-        }
+    ZStack {
+        BannerView()
+            .backgroundExtensionEffect()
+    }
+}
+.inspector(isPresented: $showInspector) {
+    // Inspector content
 }
 ```
 
-### Extending Horizontal Scrolling Under Sidebar
+Constraints:
+- The modifier clips the view to prevent the mirrored copies from overlapping each other.
+- Apply it with discretion, typically to a single instance of background content per screen, for visual clarity and performance.
+- Align the view's leading/trailing edges with the containing view's edges (touching the sidebar/inspector boundary) so the system has safe area to extend into; layer any title/button overlays on top after applying the effect so they don't get duplicated under the sidebar.
 
-To extend horizontal scroll views under a sidebar or inspector:
+### Extending Horizontal Scrolling Under a Sidebar or Inspector
+
+This behavior is structural rather than modifier-driven: when a horizontally scrolling view's content touches the leading and trailing edges of its container, the system automatically lets it scroll under an open sidebar or inspector and off the edge of the screen. No extra modifier is required to opt in — just let the scroll view's content reach the container edges (a leading `Spacer` sized to your standard padding is a common way to preserve visual alignment while still touching the edge):
 
 ```swift
-ScrollView(.horizontal) {
-    // Scrollable content
+ScrollView(.horizontal, showsIndicators: false) {
+    LazyHStack(spacing: standardPadding) {
+        Spacer()
+            .frame(width: standardPadding)
+        ForEach(items) { item in
+            ItemCard(item: item)
+        }
+    }
 }
-.scrollExtensionMode(.underSidebar)
 ```
+
+### Scroll Edge Effect Style
+
+Scrolling views (`ScrollView`, `List`, `Form`) automatically apply a Liquid Glass scroll edge effect where content meets stationary controls like toolbars. Use `.scrollEdgeEffectStyle(_:for:)` when the automatic choice isn't right for your content:
+
+```swift
+ScrollView {
+    // Content
+}
+.scrollEdgeEffectStyle(.soft, for: .top)
+.scrollEdgeEffectStyle(.hard, for: .bottom)
+```
+
+`ScrollEdgeEffectStyle` options: `.automatic` (system-chosen per platform/context), `.hard` (opaque, clearly defined boundary), `.soft` (blurred, fluid transition). To remove the effect entirely for an edge, use `.scrollEdgeEffectHidden(_:for:)`.
 
 ## Best Practices
 
@@ -278,3 +337,6 @@ GlassEffectContainer(spacing: 20) {
 - [SwiftUI GlassEffectContainer](https://developer.apple.com/documentation/SwiftUI/GlassEffectContainer)
 - [SwiftUI GlassEffectTransition](https://developer.apple.com/documentation/SwiftUI/GlassEffectTransition)
 - [SwiftUI GlassButtonStyle](https://developer.apple.com/documentation/SwiftUI/GlassButtonStyle)
+- [SwiftUI View.backgroundExtensionEffect()](https://developer.apple.com/documentation/SwiftUI/View/backgroundExtensionEffect())
+- [Landmarks: Extending horizontal scrolling under a sidebar or inspector](https://developer.apple.com/documentation/swiftui/landmarks-extending-horizontal-scrolling-under-a-sidebar-or-inspector)
+- [SwiftUI ScrollEdgeEffectStyle](https://developer.apple.com/documentation/SwiftUI/ScrollEdgeEffectStyle)

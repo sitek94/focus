@@ -18,7 +18,7 @@ struct AppView: View {
     HStack(spacing: 0) {
       primaryColumn
       if shouldShowSecondaryColumn {
-        Divider().edgesIgnoringSafeArea(.all)
+        Divider().ignoresSafeArea()
         secondaryColumn
       }
     }
@@ -49,7 +49,11 @@ struct AppView: View {
 
 ## Alternative: NavigationSplitView
 
-`NavigationSplitView` can handle sidebar + detail + supplementary columns for you, but is harder to customize in cases like:\n- a dedicated notification column independent of selection,\n- custom sizing, or\n- different toolbar behaviors per column.
+`NavigationSplitView` can handle sidebar + detail + supplementary columns for you, but is harder to customize in cases like:
+
+- a dedicated notification column independent of selection,
+- custom sizing, or
+- different toolbar behaviors per column.
 
 ```swift
 @MainActor

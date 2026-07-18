@@ -84,6 +84,8 @@ NavigationStack(path: $routerPath.path) {
 
 ## Example: binding per tab (tabs with independent history)
 
+This file owns *where the router and `NavigationStack` live for each tab*, not the `TabView` construction itself (tab identity, sidebar sections, dynamic tabs) — see `tabview.md` for that. Use this hard-coded-tabs version when the app has a small, fixed set of named tabs.
+
 ```swift
 @MainActor
 struct TabsView: View {
@@ -101,7 +103,7 @@ struct TabsView: View {
 
 ## Example: generic tabs with per-tab NavigationStack
 
-Use this when tabs are built from data and each needs its own path without hard-coded names.
+Use this when tabs are built from data and each needs its own path without hard-coded names. This is the data-driven counterpart to the example above: same rule (one router and one `NavigationStack` per tab), but the tab set and its routers come from `AppTab.allCases` plus a `TabRouter` lookup instead of one `@State` property per named tab. Pair with `tabview.md` for the full `AppTab`/`TabSection` architecture; this example only shows the router wiring.
 
 ```swift
 @MainActor
@@ -112,35 +114,42 @@ struct TabsView: View {
   var body: some View {
     TabView(selection: $selectedTab) {
       ForEach(AppTab.allCases) { tab in
-        NavigationStack(path: tabRouter.binding(for: tab)) {
-          tab.makeContentView()
+        if let router = tabRouter.router(for: tab),
+          let path = tabRouter.binding(for: tab)
+        {
+          NavigationStack(path: path) {
+            tab.makeContentView()
+          }
+          .environment(router)
+          .tabItem { tab.label }
+          .tag(tab)
         }
-        .environment(tabRouter.router(for: tab))
-        .tabItem { tab.label }
-        .tag(tab)
       }
     }
   }
 }
 ```
 
+```swift
 @MainActor
 @Observable
 final class TabRouter {
-  private var routers: [AppTab: RouterPath] = [:]
+  private let routers: [AppTab: RouterPath]
 
-  func router(for tab: AppTab) -> RouterPath {
-    if let router = routers[tab] { return router }
-    let router = RouterPath()
-    routers[tab] = router
-    return router
+  init(tabs: [AppTab] = Array(AppTab.allCases)) {
+    routers = Dictionary(uniqueKeysWithValues: tabs.map { ($0, RouterPath()) })
   }
 
-  func binding(for tab: AppTab) -> Binding<[Route]> {
-    let router = router(for: tab)
+  func router(for tab: AppTab) -> RouterPath? {
+    routers[tab]
+  }
+
+  func binding(for tab: AppTab) -> Binding<[Route]>? {
+    guard let router = router(for: tab) else { return nil }
     return Binding(get: { router.path }, set: { router.path = $0 })
   }
 }
+```
 
 ## Design choices to keep
 
@@ -156,4 +165,5 @@ final class TabRouter {
 - Do not share one path across all tabs unless you want global history.
 - Ensure route identifiers are stable and `Hashable`.
 - Avoid storing view instances in the path; store lightweight route data instead.
+- Initialize per-tab routers before SwiftUI evaluates `body`; lookup during rendering should not mutate the router collection.
 - If using a router object, keep it outside other `@Observable` objects to avoid nested observation.
