@@ -1,4 +1,4 @@
-/// Deterministic focus session domain (reducer lands in a later checkpoint).
+/// Portable Focus session domain: fixed policy, immutable state, pure reducer.
 public enum FocusSessionModule {
   public static let moduleName = "FocusSession"
 }
