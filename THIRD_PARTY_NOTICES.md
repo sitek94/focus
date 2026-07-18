@@ -80,9 +80,7 @@ Pinned through `tools/projectgen/Package.swift` for deterministic project genera
 
 ## Copied agent skills (verbatim)
 
-The skills below are verbatim copies from Dimillian/Skills. Provenance is
-recorded here and in `.agents/skills/SOURCES.md`; copied trees are not modified
-with Focus metadata headers.
+The skills below are verbatim copies from Dimillian/Skills.
 
 | Field | Value |
 |---|---|
@@ -121,13 +119,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-## Adapted agent skills
+## Adapted agent skill
 
-Each adapted skill under `.agents/skills/` records upstream URL, full SHA, source
-paths, license, and copied-vs-adapted disposition in its `SKILL.md` header.
-`make check-skills` validates `.agents/skills/SOURCES.md` against this file and
-those headers. Disposition for the MIT skill below is **adapted** (substantial
-rewrite; not verbatim copy).
+The skill below substantially adapts, rather than verbatim-copies, its source.
 
 ### focus-testing
 
@@ -158,22 +152,3 @@ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-### release-focus
-
-| Field | Value |
-|---|---|
-| Classification | Focus-authored (original); pattern/inspiration from public docs and CodexBar workflow shape |
-| Upstream | Focus-authored |
-| License | N/A (original Focus text) |
-| Focus path | `.agents/skills/release-focus/SKILL.md` |
-
-No third-party skill text is included. CodexBar and Apple/Sparkle documentation
-are cited as inspiration only; do not imply copied authorship.
-
-## Pattern / inspiration only (not copied)
-
-- CodexBar (`ecadcb1df43b8ca029e75b6311f491c0b15d45e6`, MIT) — shipping discipline patterns
-- archive-Justsayit (`58b6b1a7ef08f46981dbcfeea041d0539a85c134`, MIT) — ownership/architecture patterns
-
-Neither is vendored. Do not imply copied authorship.

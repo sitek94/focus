@@ -517,7 +517,6 @@ Do not add screenshot-golden or broad UI suites. A successful compile or launch 
 | `make docs-list` | Validate and list docs frontmatter on Linux/macOS |
 | `make format` | `swift format --in-place --recursive Sources Tests CLI Apps` |
 | `make lint` | `swift format lint --recursive Sources Tests CLI Apps` plus `Scripts/check-concurrency-safety.swift`, which rejects `@unchecked Sendable`, `nonisolated(unsafe)`, `MainActor.assumeIsolated`, and `@preconcurrency` in shipped/test Swift |
-| `make check-skills` | Validate each adapted skill’s source URL, SHA, license, and notice entry |
 | `make generate-project` | Run pinned XcodeGen at repo root |
 | `make test-linux` | `swift test` including portable SQLite/CLI integration |
 | `make test-session` / `test-persistence` / `test-control` / `test-cli` / `test-platform-gating` | Focused SwiftPM filters |
@@ -526,7 +525,7 @@ Do not add screenshot-golden or broad UI suites. A successful compile or launch 
 | `make test-macos-integration` | Real Darwin IPC/Apple adapter integration |
 | `make smoke-macos` / `make smoke-ios` | Minimal XCUITest smoke targets |
 | `make archive-macos` | Structural unsigned archive in CI; signed archive in release mode |
-| `make verify-linux` | docs, formatting, skill provenance, package build, all portable tests |
+| `make verify-linux` | toolchain pin, docs, formatting, package build, all portable tests |
 | `make verify-apple` | selected Xcode, generation, both builds, integration, both smokes, archive |
 | `make release-check VERSION=0.1.0` | Validate tag, changelog, versions, keys’ presence, and public feed configuration without publishing |
 
@@ -642,27 +641,22 @@ Do not create both a secret and a variable for the same identifier.
 
 Every `docs/` page starts with `summary` and non-empty `read_when` frontmatter. `make docs-list` validates and prints that index; `AGENTS.md` tells agents to run it before architecture, testing, or release work. Keep commands in `Makefile`/`AGENTS.md`, detailed rationale in the owner page, and links elsewhere. Do not create ADRs for reversible implementation details.
 
-## 17. Curated skills
+## 17. Agent skills
 
-Create four concise Focus-owned skills, not upstream collection copies:
+Skills hold reusable, approved engineering patterns; `docs/` owns Focus’s current
+architecture and product decisions. The current skill baseline is:
 
-| Focus skill | Source, license, disposition | Focus-specific adaptation |
-|---|---|---|
-| `.agents/skills/focus-swiftui/` | [AvdLee SwiftUI](https://github.com/AvdLee/SwiftUI-Agent-Skill/tree/f06d1437a3fbec7df6cdce93f77004e5409b31ee), MIT, materially adapted | Retain only macOS scenes/menu bar/windows, standard Liquid Glass usage, localization, accessibility, view structure, and Focus commands; correct stale examples against Apple docs |
-| `.agents/skills/focus-concurrency/` | [AvdLee concurrency](https://github.com/AvdLee/Swift-Concurrency-Agent-Skill/tree/0d472de78225d2875283c35eaca1c060c493bdb3), MIT, materially adapted | Encode Focus’s isolation map, injected clock, cancellation, test commands, and stricter ban on unsafe escapes |
-| `.agents/skills/focus-testing/` | [twostraws Swift Testing](https://github.com/twostraws/Swift-Testing-Agent-Skill/tree/2d6bba14a3c8bf3694f218b92fffe617c41ae43e), MIT, materially adapted | Route to Focus’s Swift Testing suites, Linux subset, XCUITest smokes, and no-screenshot rule |
-| `.agents/skills/release-focus/` | Focus-authored; CodexBar patterns and official Apple/Sparkle docs are inspiration/citations, not copied text | Thin router to `docs/releasing.md`, `docs/sparkle.md`, exact checks, and secret-safety rules |
+- verbatim MIT copies of `swiftui-ui-patterns`, `swiftui-view-refactor`,
+  `swiftui-performance-audit`, `swift-concurrency-expert`, and
+  `swiftui-liquid-glass` from Dimillian/Skills at
+  `05ba982bfeb0d77d3c97d4542b0ee15034d05f84`;
+- the adapted `focus-testing` router; and
+- the Focus-authored `release-focus` router.
 
-Each adapted skill header records upstream URL, full commit SHA, exact source paths, license, and whether text is copied or adapted. `.agents/skills/SOURCES.md` is the compact provenance index; `make check-skills` validates its entries against `THIRD_PARTY_NOTICES.md`.
-
-Skip:
-
-- all dpearson content for copying/adaptation because the current source is PolyForm;
-- the twostraws catalog itself as skill content;
-- entire upstream collections;
-- generic accessibility-auditor and focus-engine skills until Focus actually needs that specialized workflow;
-- duplicate SwiftUI/concurrency/testing skills;
-- release skills with owner-specific vaults, paths, or secret assumptions.
+Review copied skills visibly in follow-up commits: keep broadly useful modern
+patterns, remove rejected or stale guidance, and adapt only where Focus has an
+explicit rule. License notices remain in `THIRD_PARTY_NOTICES.md`; there is no
+automated skill-provenance gate while the repository is private.
 
 ## 18. Licensing and attribution plan
 
@@ -745,13 +739,13 @@ If the XcodeGen Mac gate fails, resolve it inside this PR by switching once to t
 | A35 | Portable tests, persistence integration, and CLI integration all pass | `make verify-linux` | Linux CI |
 | A36 | One minimal launch/UI smoke exists per platform, no screenshot suite | `make smoke-macos`, `make smoke-ios`, test-tree assertion | Mac CI |
 | A37 | Agent docs are concise, indexed, and canonical | `make docs-list`; duplicate-command/link review | Linux |
-| A38 | Skills are selective, Focus-specific, MIT-compatible, and attributed | `make check-skills`; notice/source/header audit; no PolyForm content | Linux |
+| A38 | Skills are reusable, explicit, and MIT-compatible | Manual skill and notice review; no PolyForm content | review |
 | A39 | Main is unprotected but implementation merges only through one green PR | Repo-setting/manual confirmation and CI status | GitHub + Maciek |
 | A40 | Release begins at 0.1.0 with changelog and signed tag | `make release-check VERSION=0.1.0`, tag verification | ordinary CI |
 | A41 | Release is explicit, macOS-only, signed/notarized/stapled, with valid appcast | `workflow_dispatch` inspection plus successful release logs/artifact checks | release Mac |
 | A42 | Private assets are never used as authenticated in-app feed | Public unauthenticated HTTP check of feed and enclosure; no token/static credential scan | ordinary CI |
 | A43 | Homebrew and website are absent/deferred | Workflow/repository static search | Linux |
-| A44 | Focus license/notices satisfy copied/adapted/pattern policy | `LICENSE`, notice, source-index, and file-header review | Linux |
+| A44 | Focus license/notices satisfy copied/adapted/pattern policy | `LICENSE`, notice, and source review | Linux |
 | A45 | Every needed external source was inspected from a pinned transient clone and no research clone is committed | Verify `tmp/references/sources.tsv`, each clone remote/HEAD/license, `.gitignore`, staged paths, and base-to-head diff | Linux |
 
 “Build passes,” “app launches,” and “a screenshot looks right” are insufficient evidence for the requirements that name stronger checks.

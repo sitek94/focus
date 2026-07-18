@@ -5,7 +5,7 @@ SWIFT_FORMAT_PATHS := Sources Tests CLI Apps
 VERSION ?=
 IOS_DESTINATION ?=
 
-.PHONY: help docs-list format lint check-skills generate-project \
+.PHONY: help docs-list format lint generate-project \
 	assert-swift-toolchain assert-generated-project \
 	test-linux test-session test-persistence test-control test-cli test-platform-gating \
 	log-apple-toolchain select-xcode select-ios-simulator \
@@ -14,7 +14,7 @@ IOS_DESTINATION ?=
 
 help:
 	@echo "Focus Makefile targets:"
-	@echo "  docs-list format lint check-skills generate-project"
+	@echo "  docs-list format lint generate-project"
 	@echo "  assert-swift-toolchain assert-generated-project"
 	@echo "  test-linux test-session test-persistence test-control test-cli test-platform-gating"
 	@echo "  log-apple-toolchain select-xcode select-ios-simulator"
@@ -30,9 +30,6 @@ format:
 lint:
 	swift format lint --recursive $(SWIFT_FORMAT_PATHS)
 	swift Scripts/check-concurrency-safety.swift
-
-check-skills:
-	./Scripts/check-skills
 
 assert-swift-toolchain:
 	./Scripts/assert-swift-toolchain.sh
@@ -103,7 +100,7 @@ archive-macos: require-macos select-xcode generate-project
 		xcodebuild -project Focus.xcodeproj -scheme FocusMac -archivePath build/Focus.xcarchive archive; \
 	fi
 
-verify-linux: assert-swift-toolchain docs-list lint check-skills
+verify-linux: assert-swift-toolchain docs-list lint
 	swift build
 	swift test
 

@@ -4,27 +4,18 @@ description: >
   Focus testing router: Swift Testing suites, Linux-authoritative subset,
   XCUITest smokes, and no-screenshot rule. Use when adding, reviewing, or
   migrating Focus tests.
-upstream: https://github.com/twostraws/Swift-Testing-Agent-Skill
-commit: 2d6bba14a3c8bf3694f218b92fffe617c41ae43e
-source_paths:
-  - swift-testing-pro/skills/swift-testing-pro/SKILL.md
-  - swift-testing-pro/references/core-rules.md
-  - swift-testing-pro/references/writing-better-tests.md
-  - swift-testing-pro/references/async-tests.md
-license: MIT
-disposition: adapted
 ---
 
 # Focus Testing
 
 ## Provenance
 
-| Field | Value |
-|---|---|
-| Upstream | https://github.com/twostraws/Swift-Testing-Agent-Skill |
-| Commit | `2d6bba14a3c8bf3694f218b92fffe617c41ae43e` |
-| License | MIT |
-| Disposition | **adapted** (not copied) |
+| Field        | Value                                                                                                                          |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| Upstream     | https://github.com/twostraws/Swift-Testing-Agent-Skill                                                                         |
+| Commit       | `2d6bba14a3c8bf3694f218b92fffe617c41ae43e`                                                                                     |
+| License      | MIT                                                                                                                            |
+| Disposition  | **adapted** (not copied)                                                                                                       |
 | Source paths | `swift-testing-pro/skills/swift-testing-pro/SKILL.md`; `references/core-rules.md`; `writing-better-tests.md`; `async-tests.md` |
 
 Materially rewritten to route agents to Focus’s suites and CI boundaries (`PLAN.md` §12, `docs/testing.md`). Upstream feature-catalog dumps and XCTest migration essays are omitted unless a file still uses XCTest.
@@ -39,16 +30,16 @@ Materially rewritten to route agents to Focus’s suites and CI boundaries (`PLA
 
 ## Where tests live
 
-| Suite | Lane | Covers |
-|---|---|---|
-| `FocusSessionTests` | Linux authoritative | Timing, transitions, pause/resume, catch-up, reconcile, fixed constants |
-| `FocusPersistenceIntegrationTests` | Linux authoritative | Schema, atomic snapshot+events, restore, corrupt snapshot |
-| `FocusControlTests` | Linux authoritative | Codable envelopes, framing, timeouts, path helpers |
-| `FocusCLIIntegrationTests` | Linux authoritative | Real Unix socket fixture + CLI subprocess; all seven commands |
-| `FocusPlatformGatingTests` | Linux authoritative | No Apple-framework leaks into portable targets |
-| `FocusMacIntegrationTests` | Mac CI | Darwin socket, `getpeereid`, app handler, restart/timeout |
-| `FocusMacUITests` | Mac CI | Minimal launch / menu-bar smoke |
-| `FocusIOSUITests` | Mac CI | Minimal launch / root-scene smoke |
+| Suite                              | Lane                | Covers                                                                  |
+| ---------------------------------- | ------------------- | ----------------------------------------------------------------------- |
+| `FocusSessionTests`                | Linux authoritative | Timing, transitions, pause/resume, catch-up, reconcile, fixed constants |
+| `FocusPersistenceIntegrationTests` | Linux authoritative | Schema, atomic snapshot+events, restore, corrupt snapshot               |
+| `FocusControlTests`                | Linux authoritative | Codable envelopes, framing, timeouts, path helpers                      |
+| `FocusCLIIntegrationTests`         | Linux authoritative | Real Unix socket fixture + CLI subprocess; all seven commands           |
+| `FocusPlatformGatingTests`         | Linux authoritative | No Apple-framework leaks into portable targets                          |
+| `FocusMacIntegrationTests`         | Mac CI              | Darwin socket, `getpeereid`, app handler, restart/timeout               |
+| `FocusMacUITests`                  | Mac CI              | Minimal launch / menu-bar smoke                                         |
+| `FocusIOSUITests`                  | Mac CI              | Minimal launch / root-scene smoke                                       |
 
 Commands: `make test-linux`, or focused `make test-session` / `test-persistence` / `test-control` / `test-cli` / `test-platform-gating`. Full policy: `docs/testing.md`.
 

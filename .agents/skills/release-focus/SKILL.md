@@ -4,23 +4,18 @@ description: >
   Focus release router: versioning, signed tags, notarization gates, Sparkle
   appcast, and secret-safety. Use when cutting a version or editing release
   workflows/docs.
-upstream: Focus-authored
-commit: ""
-source_paths: []
-license: N/A
-disposition: original
 ---
 
 # Release Focus
 
 ## Provenance
 
-| Field | Value |
-|---|---|
-| Upstream | Focus-authored |
-| License | N/A (original Focus text) |
-| Disposition | **original** |
-| Inspiration | CodexBar release workflow *shape* and official Apple/Sparkle docs — **not** copied text, paths, or vault assumptions |
+| Field       | Value                                                                                                                |
+| ----------- | -------------------------------------------------------------------------------------------------------------------- |
+| Upstream    | Focus-authored                                                                                                       |
+| License     | N/A (original Focus text)                                                                                            |
+| Disposition | **original**                                                                                                         |
+| Inspiration | CodexBar release workflow _shape_ and official Apple/Sparkle docs — **not** copied text, paths, or vault assumptions |
 
 ## Read first
 

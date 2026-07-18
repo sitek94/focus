@@ -13,14 +13,13 @@ Keep commands here and in the `Makefile`; put detailed rationale in the owning
 | `make docs-list` | Validate and list docs frontmatter |
 | `make format` | `swift format --in-place` on `Sources Tests CLI Apps` |
 | `make lint` | Format lint + concurrency-safety scan |
-| `make check-skills` | Validate `.agents/skills/SOURCES.md` vs notices |
 | `make generate-project` | Pinned XcodeGen → root `Focus.xcodeproj` (ignored) |
 | `make assert-swift-toolchain` / `assert-generated-project` | Pin checks for Swift 6.3.3 and `objectVersion = 90` / untracked project |
 | `make test-linux` | `swift test` (portable subset) |
 | `make test-session` / `test-persistence` / `test-control` / `test-cli` / `test-platform-gating` | Focused SwiftPM filters |
 | `make build-macos` / `make build-ios` | Generate + `xcodebuild` (macOS only) |
 | `make test-macos-integration` / `smoke-macos` / `smoke-ios` / `archive-macos` | Apple CI targets (macOS only; `ARCHIVE_MODE=ci` for unsigned gate) |
-| `make verify-linux` | Toolchain assert, docs, lint, skills, build, portable tests |
+| `make verify-linux` | Toolchain assert, docs, lint, build, portable tests |
 | `make verify-apple` | Xcode select, generate, both builds, integration, smokes, archive |
 | `make release-check VERSION=x.y.z` | Tag/changelog/version/key presence checks (no publish) |
 
@@ -49,7 +48,7 @@ not reintroduce an x86_64 slice.
 |---|---|
 | Portable `FocusSession`, `FocusPersistence`, `FocusControl`, `focus` CLI | `FocusMac` / `FocusIOS` builds, archives, UI tests |
 | Linux SQLite + Unix-socket CLI integration tests | Darwin IPC (`getpeereid`), login item, overlays |
-| Docs, license/provenance, format, skill checks | Sparkle install/update, notarization, VoiceOver |
+| Docs, license notices, format | Sparkle install/update, notarization, VoiceOver |
 | Deterministic XcodeGen generation (syntax only) | Generated project compatibility with Xcode 26 |
 
 Linux generation does **not** prove Xcode can build the project. Do not import
