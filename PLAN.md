@@ -421,7 +421,7 @@ The break uses one `@MainActor` `OverlaySessionCoordinator` and one borderless `
 
 - Enumerate `NSScreen.screens`; derive session-local display identity from `NSScreenNumber`/`CGDirectDisplayID`, not localized names.
 - Size each window to `NSScreen.frame`.
-- Start with `.screenSaver` level and `[.canJoinAllSpaces, .fullScreenAuxiliary]`; this is a Mac-tested candidate, not a documented guarantee over every third-party fullscreen app.
+- Start with `.screenSaver` level and `[.canJoinAllSpaces, .fullScreenAuxiliary]`; this is a Mac-test-required candidate, not a documented guarantee over every third-party fullscreen app.
 - Listen for `NSApplication.didChangeScreenParametersNotification`; diff displays and create/close windows without duplicates.
 - Keep exactly one primary key window for keyboard handling; every window still has a large pointer-accessible Skip button.
 - Escape skips from the primary overlay; the menu-bar Skip and normal Quit path remain available.
@@ -581,17 +581,21 @@ The generated `appcast.xml` is a release artifact, not a hand-edited source file
 | End-to-end Sparkle update from an older signed build |  | ✓ | release secrets | ✓ for signed artifacts | ✓ | Maciek credentialed Mac |
 | iOS TestFlight credentials/profiles | deferred | deferred | deferred | deferred | deferred | out of v1 |
 
-Planned secret names, never values:
+Planned CI configuration names, never values:
 
-- `APPLE_DEVELOPER_ID_APPLICATION_P12_BASE64`
-- `APPLE_DEVELOPER_ID_APPLICATION_P12_PASSWORD`
-- `APPLE_TEAM_ID`
-- `APPLE_NOTARY_API_KEY_ID`
-- `APPLE_NOTARY_API_ISSUER_ID`
-- `APPLE_NOTARY_API_PRIVATE_KEY`
-- `SPARKLE_ED25519_PRIVATE_KEY`
+- Repository secrets:
+  - `APPLE_DEVELOPER_ID_APPLICATION_P12_BASE64`
+  - `APPLE_DEVELOPER_ID_APPLICATION_P12_PASSWORD`
+  - `APPLE_NOTARY_API_PRIVATE_KEY`
+  - `SPARKLE_ED25519_PRIVATE_KEY`
+- Repository variables (non-sensitive identifiers):
+  - `APPLE_TEAM_ID`
+  - `APPLE_NOTARY_API_KEY_ID`
+  - `APPLE_NOTARY_API_ISSUER_ID`
 
-Use repository variables rather than secrets for non-sensitive IDs where policy permits.
+The workflow uses its scoped built-in `GITHUB_TOKEN`; no personal access token is an app or release prerequisite.
+
+Do not create both a secret and a variable for the same identifier.
 
 ## 16. Documentation map
 
