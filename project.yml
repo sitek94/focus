@@ -130,6 +130,10 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.macieksitkowski.focus.macos.tests
         GENERATE_INFOPLIST_FILE: YES
+        # FocusMac ships as Focus.app (PRODUCT_NAME=Focus); XcodeGen's auto
+        # TEST_HOST uses the target name, so point it at the real product.
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Focus.app/Contents/MacOS/Focus"
+        BUNDLE_LOADER: "$(TEST_HOST)"
 
   FocusMacUITests:
     type: bundle.ui-testing
