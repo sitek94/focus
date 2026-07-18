@@ -1,12 +1,12 @@
 ---
-summary: "Versioning, tagging, archive/sign/notarize checklist, and release prerequisites for Focus."
+summary: "Versioning, tagging, archive/sign/notarize checklist, and release prerequisites for Focus on macOS."
 read_when:
   - "Preparing a version bump or Git tag"
   - "Changing archive, notarization, or release workflow steps"
   - "Running make release-check"
 ---
 
-# Releasing
+# Releasing (macOS)
 
 Versioning starts at `0.1.0`. Tags are `vX.Y.Z`, signed locally by the owner,
 pushed before the release workflow runs. No tag-signing private key belongs in
@@ -29,7 +29,8 @@ repository secrets.
    - creates a **draft** GitHub Release (DMG first, then `appcast.xml`) when a
      signed DMG was produced
 4. Clean-Mac install/update smoke, then publish the draft.
-5. Never release the iOS shell (workflow guard forbids iOS/`ipa` artifacts).
+5. Never release the iOS shell from this workflow (workflow guard forbids
+   iOS/`ipa` artifacts). See `docs/release-ios.md` for the iOS release path.
 
 ## CI vs release
 

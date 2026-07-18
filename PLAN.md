@@ -634,7 +634,8 @@ Do not create both a secret and a variable for the same identifier.
 | `docs/architecture/session.md` | Fixed state machine, injected time, persistence and event semantics |
 | `docs/architecture/cli.md` | CLI commands, JSON/exit contract, IPC security and install story |
 | `docs/testing.md` | Test lanes, named acceptance cases, simulator/manual limits |
-| `docs/releasing.md` | Version/tag/archive/sign/notarize/release checklist and prerequisites |
+| `docs/release-macos.md` | Version/tag/archive/sign/notarize/release checklist and prerequisites |
+| `docs/release-ios.md` | Planned iOS release path (Xcode Cloud, TestFlight internal) — TODO |
 | `docs/sparkle.md` | Key handling, appcast generation, feed hosting, update smoke |
 | `docs/adr/0001-project-generation.md` | XcodeGen trade-off, mandatory gate, single fallback |
 | `docs/adr/0002-cli-ipc.md` | Socket threat model, rejected options, XPC pivot condition |

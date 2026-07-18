@@ -91,7 +91,8 @@ Swift 6 mode is mandatory. Reject `@unchecked Sendable`, `nonisolated(unsafe)`,
 | `docs/architecture/session.md` | State machine and time |
 | `docs/architecture/cli.md` | CLI/IPC contract |
 | `docs/testing.md` | Test lanes |
-| `docs/releasing.md` | Release checklist |
+| `docs/release-macos.md` | macOS release checklist |
+| `docs/release-ios.md` | iOS release path (TODO, not yet implemented) |
 | `docs/sparkle.md` | Updates / appcast |
 | `docs/adr/0001-project-generation.md` | XcodeGen decision |
 | `docs/adr/0002-cli-ipc.md` | Socket IPC decision |
