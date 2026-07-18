@@ -14,17 +14,21 @@ Focus uses Sparkle **2.9.4** at commit
 ## Pins and notices
 
 Recorded in `THIRD_PARTY_NOTICES.md`. Sparkle is Apple-only and is not linked
-from the shared SwiftPM package.
+from the shared SwiftPM package. FocusMac Swift sources are not wired to Sparkle
+in this CI/release-workflow checkpoint; appcast generation is release-pipeline
+only for now (`Scripts/release-generate-appcast.sh`).
 
 ## Keys and feed
 
-- Ed25519 private key stays in release secrets; only the public key belongs in
-  app configuration (`SUPublicEDKey`).
-- `appcast.xml` is a release artifact, not hand-edited source.
+- Ed25519 private key stays in release secret `SPARKLE_ED25519_PRIVATE_KEY`;
+  only the public key belongs in app configuration (`SUPublicEDKey`).
+- `appcast.xml` is a release artifact (gitignored), not hand-edited source.
 - Proposed feed:
   `https://github.com/sitek94/focus/releases/latest/download/appcast.xml`
   (requires publicly readable release assets).
 - Minimum system `26.0`, hardware `arm64`.
+- `generate_appcast` runs in `release.yml` only when the private key secret is
+  present; otherwise the step skips with a clear log.
 
 ## Smoke
 

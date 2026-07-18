@@ -15,11 +15,12 @@ Keep commands here and in the `Makefile`; put detailed rationale in the owning
 | `make lint` | Format lint + concurrency-safety scan |
 | `make check-skills` | Validate `.agents/skills/SOURCES.md` vs notices |
 | `make generate-project` | Pinned XcodeGen → root `Focus.xcodeproj` (ignored) |
+| `make assert-swift-toolchain` / `assert-generated-project` | Pin checks for Swift 6.3.3 and `objectVersion = 90` / untracked project |
 | `make test-linux` | `swift test` (portable subset) |
 | `make test-session` / `test-persistence` / `test-control` / `test-cli` / `test-platform-gating` | Focused SwiftPM filters |
 | `make build-macos` / `make build-ios` | Generate + `xcodebuild` (macOS only) |
-| `make test-macos-integration` / `smoke-macos` / `smoke-ios` / `archive-macos` | Apple CI targets (macOS only) |
-| `make verify-linux` | Docs, format, skills, build, portable tests |
+| `make test-macos-integration` / `smoke-macos` / `smoke-ios` / `archive-macos` | Apple CI targets (macOS only; `ARCHIVE_MODE=ci` for unsigned gate) |
+| `make verify-linux` | Toolchain assert, docs, lint, skills, build, portable tests |
 | `make verify-apple` | Xcode select, generate, both builds, integration, smokes, archive |
 | `make release-check VERSION=x.y.z` | Tag/changelog/version/key presence checks (no publish) |
 
