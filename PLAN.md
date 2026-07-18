@@ -1,7 +1,7 @@
 # Focus foundation blueprint
 
-Status: plan only  
-Prepared: 2026-07-17  
+Status: plan only
+Prepared: 2026-07-17
 Implementation scope: one future foundation PR; this document does not implement the app.
 
 ## 1. Executive recommendation and stack summary
@@ -61,11 +61,11 @@ Two premises in the brief changed upstream:
 | Swift | [Swift 6.3.3 announcement](https://forums.swift.org/t/announcing-swift-6-3-3/87888), [Swift releases](https://github.com/swiftlang/swift/releases), [Swift install page](https://www.swift.org/install/macos/) |
 | Current Apple OS releases | [Apple security releases](https://support.apple.com/en-us/100100), [iOS/iPadOS 26.5 notes](https://developer.apple.com/documentation/ios-ipados-release-notes/ios-ipados-26_5-release-notes), [macOS 26.5 notes](https://developer.apple.com/documentation/macos-release-notes/macos-26_5-release-notes) |
 | SwiftUI/macOS APIs | [MenuBarExtra](https://developer.apple.com/documentation/swiftui/menubarextra), [LSUIElement](https://developer.apple.com/documentation/bundleresources/information-property-list/lsuielement), [Liquid Glass](https://developer.apple.com/documentation/technologyoverviews/liquid-glass), [LocalizedStringResource](https://developer.apple.com/documentation/foundation/localizedstringresource), [SwiftUI accessibility](https://developer.apple.com/documentation/swiftui/view-accessibility) |
-| Login item | [SMAppService](https://developer.apple.com/documentation/servicemanagement/smappservice), [mainApp](https://developer.apple.com/documentation/servicemanagement/smappservice/mainapp), [openSystemSettingsLoginItems](https://developer.apple.com/documentation/servicemanagement/smappservice/opensystemsettingsloginitems()) |
+| Login item | [SMAppService](https://developer.apple.com/documentation/servicemanagement/smappservice), [mainApp](https://developer.apple.com/documentation/servicemanagement/smappservice/mainapp), [openSystemSettingsLoginItems](https://developer.apple.com/documentation/servicemanagement/smappservice/opensystemsettingsloginitems%28%29) |
 | Displays/windows | [NSScreen](https://developer.apple.com/documentation/appkit/nsscreen), [NSScreen.frame](https://developer.apple.com/documentation/appkit/nsscreen/frame), [NSWindow.CollectionBehavior](https://developer.apple.com/documentation/appkit/nswindow/collectionbehavior-swift.struct) |
 | GitHub runners | [`actions/runner-images` pin](https://github.com/actions/runner-images/commit/762deea5bafc5981af76507cbdd88ae20bf191cd), [hosted runner reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners), [pinned macOS 26 arm64 manifest](https://raw.githubusercontent.com/actions/runner-images/762deea5bafc5981af76507cbdd88ae20bf191cd/images/macos/macos-26-arm64-Readme.md), [Xcode 26.6 default rollout notice](https://github.com/actions/runner-images/issues/14344) |
 | Project generation | [XcodeGen 2.46.0](https://github.com/yonaskolb/XcodeGen/tree/8445e778451c7e44237b90281bde622d764b0084), [Xcode 26 format issue](https://github.com/yonaskolb/XcodeGen/issues/1620), [Tuist 4.202.5](https://github.com/tuist/tuist/tree/cf80c01da0d941ecad9f4847e81ffd1623f06949), [Linux generate gate at a pinned Tuist source revision](https://github.com/tuist/tuist/blob/c23435bd8b45c2c97d3c89c9dece7fba80ab5c09/cli/Sources/TuistGenerateCommand/GenerateCommand.swift) |
-| IPC | [POSIX `socket`](https://pubs.opengroup.org/onlinepubs/9699919799/functions/socket.html), [Darwin `getpeereid`](https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/getpeereid.3.html), [NSXPC code-signing requirement](https://developer.apple.com/documentation/foundation/nsxpclistener/setconnectioncodesigningrequirement(_:)) |
+| IPC | [POSIX `socket`](https://pubs.opengroup.org/onlinepubs/9699919799/functions/socket.html), [Darwin `getpeereid`](https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/getpeereid.3.html), [NSXPC code-signing requirement](https://developer.apple.com/documentation/foundation/nsxpclistener/setconnectioncodesigningrequirement%28_%3A%29) |
 | Sparkle | [Sparkle 2.9.4](https://github.com/sparkle-project/Sparkle/tree/b6496a74a087257ef5e6da1c5b29a447a60f5bd7), [programmatic setup](https://sparkle-project.org/documentation/programmatic-setup/), [publishing](https://sparkle-project.org/documentation/publishing/), [sandboxing](https://sparkle-project.org/documentation/sandboxing/) |
 | Product-flow inspiration | [LookAway introduction](https://lookaway.com/docs/introduction/), [setup](https://lookaway.com/docs/setting-up/), [break-flow discussion](https://lookaway.com/blog/2025/04/07/how-i-made-break-reminders-less-annoying/) |
 
@@ -199,7 +199,7 @@ That is XcodeGen’s highest available format (`objectVersion = 90`). Xcode 26�
 | Swift Testing | Bundled with Swift 6.3.3 | Shared tests | Native parameterized deterministic tests |
 | XCTest/XCUITest | Bundled with Xcode 26.6 | Apple integration and smoke tests | Required Apple process/UI launch harness |
 | SwiftUI, AppKit, Foundation, ServiceManagement | Apple SDK | App | Native platform implementation |
-| GitHub Actions | Pin `actions/checkout` to `9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0`; pin `actions/upload-artifact` to `043fb46d1a93c77aae656e7c1c64a875d1fc6a0a` if used | CI | Reproducible workflow dependencies |
+| GitHub Actions | Pin `actions/checkout` v7.0.0 to `9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0`; pin `actions/upload-artifact` v7.0.1 to `043fb46d1a93c77aae656e7c1c64a875d1fc6a0a` if used | CI | Reproducible workflow dependencies |
 
 Do not initially add Swift Argument Parser, Commander, SwiftLint, a second formatter, an ORM, SwiftNIO, an HTTP server, analytics, visual-regression tooling, a release helper, or build caches. The CLI surface is small enough for a focused parser; add a dependency only after measured complexity justifies it.
 
@@ -237,7 +237,7 @@ There is no speculative mode/configuration engine. A first launch with no snapsh
 - Pause is legal during focus, warning, or break; it hides warning/overlay presentation and freezes exact remaining durations. Paused time never counts.
 - Resume rebuilds deadlines from the frozen durations. A paused snapshot remains paused across relaunch.
 - The CLI `start` bootstraps a missing runtime and may cold-launch the app. It is a successful no-op when an active runtime already exists and is rejected with “use resume” when the persisted runtime is paused.
-- `trigger-break` starts a full break from focus, warning, or paused state and is a successful no-op if already in break.
+- `trigger-break` starts a full break from focus or warning and is a successful no-op if already in break. From a paused state it explicitly abandons the frozen phase, resumes the schedule, and starts an active 20-second break so the overlay appears immediately.
 - Reconcile before every wake, restore, and command so stale warning actions cannot mutate a state that has already advanced.
 
 Wall-clock deadlines count elapsed time through screen lock, idle time, sleep, and app downtime; only explicit pause excludes time. If a persisted focus/warning deadline is overdue at restore or wake, start one full catch-up break at the current `now`. Do not fabricate repeated cycles or outcome history for every missed interval. If a persisted break has already ended, record its completion once, derive the next focus, and then apply the same bounded catch-up rule. Store UTC instants; timezone changes do not affect elapsed time. A backward system-clock jump delays a future deadline but never creates reverse transitions.
@@ -282,6 +282,12 @@ Focus is active: focus, 19m 50s until warning.
 
 $ focus pause
 Paused during focus. 12m 30s until warning is frozen.
+
+$ focus resume
+Focus resumed: focus, 12m 30s until warning.
+
+$ focus resume
+Focus is already active: focus, 12m 29s until warning.
 
 $ focus snooze
 Break snoozed for 1m. Next warning in 50s.
@@ -450,7 +456,7 @@ Compile SwiftPM and Xcode targets in Swift 6 mode. Do not add `@unchecked Sendab
 | `FocusSessionTests` (Swift Testing) | first boot; 19m50s warning; due break; 20s completion; repeated cycles; start-now; exact 60s snooze/re-warning; warning/break skip; pause/resume in every phase; long pause; bounded catch-up after sleep/relaunch; backward-clock behavior; reconcile idempotence; fixed constants |
 | `FocusPersistenceIntegrationTests` | fresh schema; migration; snapshot/event atomic commit and rollback; paused restore; required started/completed/snoozed/skipped records; sequence ordering; corrupt snapshot failure; no timing preference fields |
 | `FocusControlTests` | request/response Codable round trips; unknown additive fields; major mismatch; partial frame reads/writes; malformed/oversized frame rejection; timeout/cancellation; path-length/type/owner helpers |
-| `FocusCLIIntegrationTests` | real Linux Unix socket fixture plus CLI subprocess; all seven commands; human stdout/stderr; stable JSON snapshots; exit codes; post-command read-back; concurrent commands |
+| `FocusCLIIntegrationTests` | real Linux Unix socket fixture plus CLI subprocess; all seven commands; human stdout/stderr; stable JSON snapshots; exit codes; post-command read-back; concurrent commands. An injected `AppLauncherClient` lets Linux record a cold-launch request and start the fixture listener; the real Launch Services path runs only in `FocusMacIntegrationTests`. |
 | `FocusPlatformGatingTests` | Apple-only launch/peer APIs are cleanly injected or conditionally excluded; no Apple framework import leaks into portable targets |
 
 This adapts CodexBar’s `TestsLinux` idea without creating a parallel duplicate source tree: portable tests live with their owning SwiftPM feature, and the platform-gating suite makes the Linux boundary explicit.
@@ -482,11 +488,11 @@ Do not add screenshot-golden or broad UI suites. A successful compile or launch 
 |---|---|
 | `make docs-list` | Validate and list docs frontmatter on Linux/macOS |
 | `make format` | `swift format --in-place --recursive Sources Tests CLI Apps` |
-| `make lint` | `swift format lint --recursive Sources Tests CLI Apps` plus plan-specific static checks |
+| `make lint` | `swift format lint --recursive Sources Tests CLI Apps` plus `Scripts/check-concurrency-safety.swift`, which rejects `@unchecked Sendable`, `nonisolated(unsafe)`, `MainActor.assumeIsolated`, and `@preconcurrency` in shipped/test Swift |
 | `make check-skills` | Validate each adapted skill’s source URL, SHA, license, and notice entry |
 | `make generate-project` | Run pinned XcodeGen at repo root |
 | `make test-linux` | `swift test` including portable SQLite/CLI integration |
-| `make test-session` / `test-persistence` / `test-control` / `test-cli` | Focused SwiftPM filters |
+| `make test-session` / `test-persistence` / `test-control` / `test-cli` / `test-platform-gating` | Focused SwiftPM filters |
 | `make build-macos` | Generate, then generic macOS build with Xcode 26.6 |
 | `make build-ios` | Generate, then generic iOS build with signing disabled |
 | `make test-macos-integration` | Real Darwin IPC/Apple adapter integration |
@@ -611,7 +617,7 @@ Create four concise Focus-owned skills, not upstream collection copies:
 | Focus skill | Source, license, disposition | Focus-specific adaptation |
 |---|---|---|
 | `.agents/skills/focus-swiftui/` | [AvdLee SwiftUI](https://github.com/AvdLee/SwiftUI-Agent-Skill/tree/f06d1437a3fbec7df6cdce93f77004e5409b31ee), MIT, materially adapted | Retain only macOS scenes/menu bar/windows, standard Liquid Glass usage, localization, accessibility, view structure, and Focus commands; correct stale examples against Apple docs |
-| `.agents/skills/focus-concurrency/` | [AvdLee concurrency](https://github.com/AvdLee/Swift-Concurrency-Agent-Skill/tree/0d472de78225d2875283c35eaca1c060c493bdb3), MIT, materially adapted; separately attribute any [twostraws concurrency](https://github.com/twostraws/Swift-Concurrency-Agent-Skill/tree/bee3f69ba17142da148d3c5406f148ed62592b69) material | Encode Focus’s isolation map, injected clock, cancellation, test commands, and stricter ban on unsafe escapes |
+| `.agents/skills/focus-concurrency/` | [AvdLee concurrency](https://github.com/AvdLee/Swift-Concurrency-Agent-Skill/tree/0d472de78225d2875283c35eaca1c060c493bdb3), MIT, materially adapted | Encode Focus’s isolation map, injected clock, cancellation, test commands, and stricter ban on unsafe escapes |
 | `.agents/skills/focus-testing/` | [twostraws Swift Testing](https://github.com/twostraws/Swift-Testing-Agent-Skill/tree/2d6bba14a3c8bf3694f218b92fffe617c41ae43e), MIT, materially adapted | Route to Focus’s Swift Testing suites, Linux subset, XCUITest smokes, and no-screenshot rule |
 | `.agents/skills/release-focus/` | Focus-authored; CodexBar patterns and official Apple/Sparkle docs are inspiration/citations, not copied text | Thin router to `docs/releasing.md`, `docs/sparkle.md`, exact checks, and secret-safety rules |
 
@@ -692,7 +698,7 @@ If the XcodeGen Mac gate fails, resolve it inside this PR by switching once to t
 | A21 | iOS 26 shell imports shared core, compiles, and launches; it is not released | `make build-ios`, `make smoke-ios`, release-workflow assertion of no iOS upload | Mac CI |
 | A22 | Shared core is pure Swift/Foundation and deterministic | `swift build`, `swift test`, forbidden-import/sleep scan | Linux |
 | A23 | Views are thin and each state domain has one owner | Architecture dependency test/search plus reviewer checklist | Linux review |
-| A24 | Swift 6 strict concurrency has no unsafe escape | Swift 6 builds and static scan for forbidden annotations | Linux + Mac CI |
+| A24 | Swift 6 strict concurrency has no unsafe escape | Swift 6 builds and `make lint` running `Scripts/check-concurrency-safety.swift` | Linux + Mac CI |
 | A25 | CLI has required six commands plus justified `snooze` | `swift run focus --help` golden test | Linux |
 | A26 | Human output, JSON schema, exits, and read-back match section 8 | CLI subprocess integration tests, JSON golden/semantic decoding, exit assertions | Linux |
 | A27 | `status` does not launch; only `start` may cold-launch | fake launcher tests and real Mac integration | Linux + Mac CI |
