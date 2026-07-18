@@ -39,13 +39,14 @@ func peerAndLaunchSeamsAreInjectable() throws {
   try sameUser.verifyPeer(fileDescriptor: 0)
 
   let defaultChecker = ControlPeerIdentity.makeDefaultChecker()
-  #expect(defaultChecker is SameUserPeerIdentityChecker)
 
   #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
+    #expect(defaultChecker is DarwinPeerIdentityChecker)
     let darwin: any ControlPeerIdentityChecking = DarwinPeerIdentityChecker()
     #expect(darwin is DarwinPeerIdentityChecker)
     _ = DarwinControlSocketPathResolver()
   #else
+    #expect(defaultChecker is SameUserPeerIdentityChecker)
     // Darwin getpeereid / _CS_DARWIN_USER_TEMP_DIR types are compiled out on Linux.
     #expect(!(defaultChecker is NSObject))
   #endif

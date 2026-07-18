@@ -32,8 +32,16 @@ swift build
 swift test
 ```
 
-Apple hosts must use Xcode 26.6:
-`/Applications/Xcode_26.6.app/Contents/Developer`.
+Toolchain pins live in one-line root files: `.swift-version` (swiftly) and
+`.xcode-version` (the Xcode marketing version). `select-xcode` reads
+`.xcode-version` and honors an already-correct `DEVELOPER_DIR` or active
+`xcode-select` first (no sudo); otherwise it falls back to
+`/Applications/Xcode_<version>.app` and `sudo xcode-select -s`. Local dev with a
+plain `Xcode.app`: `export DEVELOPER_DIR="$(xcode-select -p)"` (once it points at
+the pinned version) and every `make` Apple target works without sudo.
+
+Apple targets are `ARCHS = arm64` only (macOS/iOS 26 are Apple-silicon only); do
+not reintroduce an x86_64 slice.
 
 ## Proof boundary
 

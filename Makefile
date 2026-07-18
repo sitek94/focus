@@ -2,7 +2,6 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 SWIFT_FORMAT_PATHS := Sources Tests CLI Apps
-XCODE := /Applications/Xcode_26.6.app/Contents/Developer
 VERSION ?=
 IOS_DESTINATION ?=
 
@@ -65,10 +64,6 @@ test-platform-gating:
 require-macos:
 	@if [[ "$$(uname -s)" != "Darwin" ]]; then \
 		echo "error: this target requires macOS with Xcode 26.6" >&2; \
-		exit 1; \
-	fi
-	@if [[ ! -d "$(XCODE)" ]]; then \
-		echo "error: expected Xcode at $(XCODE)" >&2; \
 		exit 1; \
 	fi
 

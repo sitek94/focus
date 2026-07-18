@@ -7,6 +7,23 @@ and this project uses [Semantic Versioning](https://semver.org/).
 
 ## [0.1.0] — Unreleased
 
+### Fixed
+
+- `FocusMacApp` attached `.task` to a `Scene`, which does not compile; moved the
+  bootstrap onto the menu-bar label view so the macOS app builds.
+- `FocusPlatformGatingTests` asserted the Linux peer checker unconditionally;
+  gated the assertion so the portable suite also passes on macOS hosts.
+
+### Changed
+
+- Apple targets build `arm64` only (`ARCHS = arm64`); macOS/iOS 26 are
+  Apple-silicon only, so the former universal build's x86_64 slice was dead
+  weight and broke against arm64-only Homebrew SQLite.
+- Xcode pin moved to a root `.xcode-version` file (sibling of `.swift-version`).
+  `select-xcode` reads it and prefers an already-correct `DEVELOPER_DIR` or
+  active `xcode-select` before the `sudo` fallback, so local Apple builds no
+  longer require sudo.
+
 ### Added
 
 - Foundation repository contracts: MIT license, third-party notices, agent docs,

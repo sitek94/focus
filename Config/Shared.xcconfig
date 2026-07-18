@@ -13,3 +13,6 @@ MACOSX_DEPLOYMENT_TARGET = 26.0
 IPHONEOS_DEPLOYMENT_TARGET = 26.0
 SUPPORTED_PLATFORMS = macosx iphoneos iphonesimulator
 ONLY_ACTIVE_ARCH = YES
+// macOS 26 (Tahoe) and iOS 26 are Apple-silicon only; an x86_64 slice can never
+// run and only breaks against arm64-only deps (e.g. Homebrew sqlite). arm64 only.
+ARCHS = arm64

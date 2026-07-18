@@ -48,10 +48,10 @@ struct FocusMacApp: App {
       Label("Focus", systemImage: "timer")
         .accessibilityLabel("Focus")
         .accessibilityIdentifier("focus.mac.menubar.status")
+        .task {
+          await owner.bootstrap()
+        }
     }
     .menuBarExtraStyle(.menu)
-    .task {
-      await owner.bootstrap()
-    }
   }
 }
