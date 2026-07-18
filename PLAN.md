@@ -1,8 +1,8 @@
 # Focus foundation blueprint
 
-Status: plan only
+Status: implemented in PR (branch `cursor/focus-foundation-ea41`); Mac CI and manual Mac acceptance remain gates
 Prepared: 2026-07-17
-Implementation scope: one future foundation PR; this document does not implement the app.
+Implementation scope: one foundation PR executing this blueprint.
 
 ## 1. Executive recommendation and stack summary
 
