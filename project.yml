@@ -1,0 +1,198 @@
+name: Focus
+options:
+  projectFormat: xcode16_3
+  developmentLanguage: en
+  deploymentTarget:
+    macOS: "26.0"
+    iOS: "26.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+  defaultConfig: Debug
+
+configs:
+  Debug: debug
+  Release: release
+
+configFiles:
+  Debug: Config/Debug.xcconfig
+  Release: Config/Release.xcconfig
+
+settings:
+  base:
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+
+packages:
+  Focus:
+    path: .
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    revision: b6496a74a087257ef5e6da1c5b29a447a60f5bd7
+
+targets:
+  FocusMac:
+    type: application
+    platform: macOS
+    sources:
+      - path: Apps/Focus/FocusMac
+        excludes:
+          - "**/.DS_Store"
+    dependencies:
+      - package: Focus
+        product: FocusSession
+      - package: Focus
+        product: FocusPersistence
+      - package: Focus
+        product: FocusControl
+      - package: Sparkle
+        product: Sparkle
+      - target: FocusCLI
+        embed: true
+        codeSign: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.macieksitkowski.focus.macos
+        PRODUCT_NAME: Focus
+        PRODUCT_MODULE_NAME: FocusMac
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Focus
+        INFOPLIST_KEY_LSUIElement: YES
+        INFOPLIST_KEY_NSHumanReadableCopyright: "Copyright © 2026 Maciek Sitkowski"
+        # Placeholder Ed25519 public key (all-zero). Replace before shipping updates.
+        # See docs/sparkle.md — private key never belongs in source.
+        INFOPLIST_KEY_SUPublicEDKey: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+        INFOPLIST_KEY_SUFeedURL: https://github.com/sitek94/focus/releases/latest/download/appcast.xml
+        INFOPLIST_KEY_SUEnableAutomaticChecks: YES
+        COMBINE_HIDPI_IMAGES: YES
+        LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/../Frameworks"
+        CODE_SIGN_ENTITLEMENTS: Apps/Focus/FocusMac/Resources/FocusMac.entitlements
+    scheme:
+      testTargets:
+        - FocusMacIntegrationTests
+        - FocusMacUITests
+
+  FocusIOS:
+    type: application
+    platform: iOS
+    sources:
+      - path: Apps/Focus/FocusIOS
+        excludes:
+          - "**/.DS_Store"
+    dependencies:
+      - package: Focus
+        product: FocusSession
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.macieksitkowski.focus.ios
+        PRODUCT_NAME: Focus
+        PRODUCT_MODULE_NAME: FocusIOS
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Focus
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        TARGETED_DEVICE_FAMILY: "1,2"
+        LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/Frameworks"
+    scheme:
+      testTargets:
+        - FocusIOSUITests
+
+  FocusCLI:
+    type: tool
+    platform: macOS
+    sources:
+      - path: CLI/FocusCLI
+    dependencies:
+      - package: Focus
+        product: FocusControl
+      - package: Focus
+        product: FocusSession
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.macieksitkowski.focus.cli
+        PRODUCT_NAME: focus
+        PRODUCT_MODULE_NAME: FocusCLI
+        GENERATE_INFOPLIST_FILE: YES
+        SKIP_INSTALL: YES
+        LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/../Frameworks"
+
+  FocusMacIntegrationTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Apps/Focus/FocusMacIntegrationTests
+    dependencies:
+      - target: FocusMac
+      - package: Focus
+        product: FocusControl
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.macieksitkowski.focus.macos.tests
+        GENERATE_INFOPLIST_FILE: YES
+
+  FocusMacUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    sources:
+      - path: Apps/Focus/FocusMacUITests
+    dependencies:
+      - target: FocusMac
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.macieksitkowski.focus.macos.uitests
+        GENERATE_INFOPLIST_FILE: YES
+
+  FocusIOSUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: Apps/Focus/FocusIOSUITests
+    dependencies:
+      - target: FocusIOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.macieksitkowski.focus.ios.uitests
+        GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  FocusMac:
+    build:
+      targets:
+        FocusMac: all
+        FocusCLI: all
+    test:
+      targets:
+        - FocusMacIntegrationTests
+        - FocusMacUITests
+  FocusIOS:
+    build:
+      targets:
+        FocusIOS: all
+    test:
+      targets:
+        - FocusIOSUITests
+  FocusMacIntegrationTests:
+    build:
+      targets:
+        FocusMacIntegrationTests: all
+        FocusMac: all
+    test:
+      targets:
+        - FocusMacIntegrationTests
+  FocusMacUITests:
+    build:
+      targets:
+        FocusMacUITests: all
+        FocusMac: all
+    test:
+      targets:
+        - FocusMacUITests
+  FocusIOSUITests:
+    build:
+      targets:
+        FocusIOSUITests: all
+        FocusIOS: all
+    test:
+      targets:
+        - FocusIOSUITests

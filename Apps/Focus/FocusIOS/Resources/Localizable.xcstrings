@@ -1,0 +1,30 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "focus_ios_brand": {
+      "comment": "Brand name shown as the iOS shell hero title.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Focus"
+          }
+        }
+      }
+    },
+    "focus_ios_status_placeholder": {
+      "comment": "States that Focus iOS is an unreleased shell showing status only.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non-released iOS shell — status placeholder"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

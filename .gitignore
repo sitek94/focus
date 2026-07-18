@@ -1,0 +1,56 @@
+# Research / session clones (never commit)
+/tmp/
+tmp/
+
+# SwiftPM
+.build/
+.swiftpm/config/registries.json
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+
+# Generated Xcode project (XcodeGen output)
+Focus.xcodeproj/
+*.xcworkspace/
+!tools/**/*.xcworkspace
+
+# Xcode / DerivedData
+DerivedData/
+DerivedData*/
+build/
+*.xcarchive/
+*.xcresult/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Xcode user data
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDEs / editors
+.idea/
+.vscode/
+*.swp
+*~
+
+# Release / local secrets
+*.p12
+*.cer
+*.mobileprovision
+.env
+.env.*
+!.env.example
+*.local
+
+# Archives and packages
+*.dmg
+*.pkg
+*.zip
+*.tar.gz
+appcast.xml

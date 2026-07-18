@@ -1,0 +1,9 @@
+// Bundle identifiers for Focus Apple targets.
+// Namespace prefix com.macieksitkowski.focus is locked; platform suffixes are concrete IDs.
+
+FOCUS_MAC_BUNDLE_ID = com.macieksitkowski.focus.macos
+FOCUS_IOS_BUNDLE_ID = com.macieksitkowski.focus.ios
+FOCUS_CLI_BUNDLE_ID = com.macieksitkowski.focus.cli
+FOCUS_MAC_TESTS_BUNDLE_ID = com.macieksitkowski.focus.macos.tests
+FOCUS_MAC_UITESTS_BUNDLE_ID = com.macieksitkowski.focus.macos.uitests
+FOCUS_IOS_UITESTS_BUNDLE_ID = com.macieksitkowski.focus.ios.uitests

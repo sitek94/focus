@@ -1,0 +1,157 @@
+# Focus PR / main CI — PLAN.md §14
+# Never signs, notarizes, tags, publishes, or modifies appcast on merge.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  SWIFT_VERSION: "6.3.3"
+  SWIFTLY_VERSION: "1.1.3"
+  SWIFTLY_SIGNING_FINGERPRINT: "E813C892820A6FA13755B268F167DF1ACF9CE069"
+
+jobs:
+  linux-shared:
+    name: linux-shared
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        # actions/checkout v7.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Install system dependencies
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            ca-certificates curl gpg libcurl4-openssl-dev libsqlite3-dev pkg-config
+
+      - name: Install Swift ${{ env.SWIFT_VERSION }}
+        run: ./Scripts/ci-install-swift-linux.sh
+
+      - name: Assert Swift toolchain
+        run: ./Scripts/assert-swift-toolchain.sh
+
+      - name: Verify Linux (docs, lint, skills, build, portable tests)
+        run: make verify-linux
+
+  apple-build:
+    name: apple-build
+    runs-on: macos-26
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        # actions/checkout v7.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Log Apple toolchain / runner image
+        run: ./Scripts/log-apple-toolchain.sh
+
+      - name: Select Xcode 26.6
+        run: ./Scripts/select-xcode.sh
+
+      - name: Log Apple toolchain after select
+        run: ./Scripts/log-apple-toolchain.sh
+
+      - name: Generate Focus.xcodeproj
+        run: make generate-project
+
+      - name: Assert objectVersion=90 and project untracked
+        run: make assert-generated-project
+
+      - name: Build FocusMac
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project Focus.xcodeproj \
+            -scheme FocusMac \
+            -destination "generic/platform=macOS" \
+            build
+
+      - name: Build FocusIOS
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project Focus.xcodeproj \
+            -scheme FocusIOS \
+            -destination "generic/platform=iOS" \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+  macos-integration:
+    name: macos-integration
+    runs-on: macos-26
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        # actions/checkout v7.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Log Apple toolchain / runner image
+        run: ./Scripts/log-apple-toolchain.sh
+
+      - name: Select Xcode 26.6
+        run: ./Scripts/select-xcode.sh
+
+      - name: Darwin IPC / adapter integration
+        # May fail until checkpoint 6 fills FocusMacIntegrationTests; target is wired.
+        run: make test-macos-integration
+
+      - name: macOS UI smoke
+        # May fail until checkpoint 8 smoke is meaningful; target is wired.
+        run: make smoke-macos
+
+  ios-smoke:
+    name: ios-smoke
+    runs-on: macos-26
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        # actions/checkout v7.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Log Apple toolchain / runner image
+        run: ./Scripts/log-apple-toolchain.sh
+
+      - name: Select Xcode 26.6
+        run: ./Scripts/select-xcode.sh
+
+      - name: Select iOS 26 simulator
+        run: ./Scripts/select-ios-simulator.sh
+
+      - name: iOS UI smoke
+        run: make smoke-ios
+
+  macos-archive-gate:
+    name: macos-archive-gate
+    runs-on: macos-26
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        # actions/checkout v7.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Log Apple toolchain / runner image
+        run: ./Scripts/log-apple-toolchain.sh
+
+      - name: Select Xcode 26.6
+        run: ./Scripts/select-xcode.sh
+
+      - name: Generate Focus.xcodeproj
+        run: make generate-project
+
+      - name: Assert objectVersion=90 and project untracked
+        run: make assert-generated-project
+
+      - name: Structural unsigned archive + project-format warning check
+        run: make archive-macos ARCHIVE_MODE=ci

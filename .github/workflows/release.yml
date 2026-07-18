@@ -1,0 +1,174 @@
+# Focus macOS release — PLAN.md §15
+# Manual only (workflow_dispatch). Never uploads or releases the iOS shell.
+#
+# Secrets / variables are OPTIONAL until a real credentialed release:
+#   Secrets: APPLE_DEVELOPER_ID_APPLICATION_P12_BASE64,
+#            APPLE_DEVELOPER_ID_APPLICATION_P12_PASSWORD,
+#            APPLE_NOTARY_API_PRIVATE_KEY, SPARKLE_ED25519_PRIVATE_KEY
+#   Variables: APPLE_TEAM_ID, APPLE_NOTARY_API_KEY_ID, APPLE_NOTARY_API_ISSUER_ID
+# When absent, signing / notarization / appcast / publish steps SKIP with a clear log.
+# Tag-signing private keys must never be stored as repository secrets.
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Signed git tag to release (vX.Y.Z); must already exist on the remote"
+        required: true
+        type: string
+
+concurrency:
+  group: release-${{ github.workflow }}-${{ inputs.tag }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  SWIFT_VERSION: "6.3.3"
+
+jobs:
+  release-macos:
+    name: release-macos
+    runs-on: macos-26
+    timeout-minutes: 180
+    env:
+      APPLE_DEVELOPER_ID_APPLICATION_P12_BASE64: ${{ secrets.APPLE_DEVELOPER_ID_APPLICATION_P12_BASE64 }}
+      APPLE_DEVELOPER_ID_APPLICATION_P12_PASSWORD: ${{ secrets.APPLE_DEVELOPER_ID_APPLICATION_P12_PASSWORD }}
+      APPLE_NOTARY_API_PRIVATE_KEY: ${{ secrets.APPLE_NOTARY_API_PRIVATE_KEY }}
+      SPARKLE_ED25519_PRIVATE_KEY: ${{ secrets.SPARKLE_ED25519_PRIVATE_KEY }}
+      APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+      APPLE_NOTARY_API_KEY_ID: ${{ vars.APPLE_NOTARY_API_KEY_ID }}
+      APPLE_NOTARY_API_ISSUER_ID: ${{ vars.APPLE_NOTARY_API_ISSUER_ID }}
+    steps:
+      - name: Validate tag input
+        shell: bash
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.+-]+)?$ ]]; then
+            echo "error: tag must look like vX.Y.Z (got '${TAG}')" >&2
+            exit 1
+          fi
+          version="${TAG#v}"
+          echo "FOCUS_RELEASE_TAG=${TAG}" >>"$GITHUB_ENV"
+          echo "FOCUS_RELEASE_VERSION=${version}" >>"$GITHUB_ENV"
+          echo "Validated tag ${TAG} (version ${version})"
+
+      - name: Checkout exact tag
+        # actions/checkout v7.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: ${{ inputs.tag }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Verify signed tag (fails closed without Config/git-allowed-signers)
+        env:
+          FOCUS_REQUIRE_SIGNED_TAG: "1"
+        run: ./Scripts/verify-signed-tag.sh "${FOCUS_RELEASE_TAG}"
+
+      - name: Version / changelog / marketing version checks
+        env:
+          FOCUS_REQUIRE_RELEASE_SECRETS: "1"
+        run: make release-check VERSION="${FOCUS_RELEASE_VERSION}"
+
+      - name: Log Apple toolchain / runner image
+        run: ./Scripts/log-apple-toolchain.sh
+
+      - name: Select Xcode 26.6
+        run: ./Scripts/select-xcode.sh
+
+      - name: Log Apple toolchain after select
+        run: ./Scripts/log-apple-toolchain.sh
+
+      - name: Regenerate Focus.xcodeproj
+        run: |
+          set -euo pipefail
+          make generate-project
+          make assert-generated-project
+
+      - name: Import Developer ID certificate (skipped when secret absent)
+        run: ./Scripts/release-import-signing.sh
+
+      - name: Archive / export arm64 Focus.app (+ DMG when signed)
+        run: ./Scripts/release-archive-export.sh "${FOCUS_RELEASE_VERSION}"
+
+      - name: Notarize and staple DMG (skipped when notary secret absent)
+        if: ${{ env.FOCUS_RELEASE_DMG != '' }}
+        run: ./Scripts/release-notarize.sh "${FOCUS_RELEASE_DMG}"
+
+      - name: Generate Sparkle appcast (skipped when Ed25519 secret absent)
+        if: ${{ env.FOCUS_RELEASE_DMG != '' }}
+        run: |
+          set -euo pipefail
+          artifact_dir="$(dirname "${FOCUS_RELEASE_DMG}")"
+          ./Scripts/release-generate-appcast.sh "$artifact_dir"
+
+      - name: Assert release artifacts exclude iOS
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Hard guard: never stage or upload iOS products from this workflow.
+          if compgen -G 'build/release/**/*iOS*' >/dev/null 2>&1; then
+            echo "error: iOS artifacts must not appear under build/release" >&2
+            find build/release -iname '*ios*' -print >&2 || true
+            exit 1
+          fi
+          if compgen -G 'build/release/**/*.ipa' >/dev/null 2>&1; then
+            echo "error: .ipa must never be a Focus release artifact" >&2
+            exit 1
+          fi
+          echo "release: iOS exclusion check ok"
+
+      - name: Upload release artifacts (workflow artifact; optional draft GH release)
+        if: ${{ env.FOCUS_RELEASE_DMG != '' }}
+        # actions/upload-artifact v7.0.1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: focus-${{ env.FOCUS_RELEASE_VERSION }}-macos-arm64
+          path: |
+            ${{ env.FOCUS_RELEASE_DMG }}
+            build/release/appcast.xml
+          if-no-files-found: warn
+
+      - name: Create draft GitHub Release (skipped without DMG)
+        if: ${{ env.FOCUS_RELEASE_DMG != '' }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          assets=("${FOCUS_RELEASE_DMG}")
+          if [[ -f build/release/appcast.xml ]]; then
+            assets+=(build/release/appcast.xml)
+          fi
+          # Draft only — publish after manual install/update smoke (PLAN §15 step 11).
+          gh release create "${FOCUS_RELEASE_TAG}" \
+            --draft \
+            --title "Focus ${FOCUS_RELEASE_VERSION}" \
+            --notes-file CHANGELOG.md \
+            "${assets[@]}"
+          echo "release: draft GitHub Release created for ${FOCUS_RELEASE_TAG}"
+          echo "release: upload order is DMG first, then appcast.xml when present"
+          echo "release: do not publish until clean-Mac install/update smoke passes"
+          echo "release: NEVER attach iOS builds"
+
+      - name: Summarize skipped credentialed steps
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "### Release wiring status"
+            echo ""
+            echo "| Step | Status |"
+            echo "| --- | --- |"
+            echo "| Signed-tag policy | placeholder unless Config/git-allowed-signers exists |"
+            echo "| Developer ID import | FOCUS_SIGNING_AVAILABLE=${FOCUS_SIGNING_AVAILABLE:-unset} |"
+            echo "| DMG path | \`${FOCUS_RELEASE_DMG:-<none — secrets absent>}\` |"
+            echo "| Notary / Sparkle / draft release | require DMG + respective secrets |"
+            echo "| iOS upload | forbidden (guarded) |"
+          } >>"$GITHUB_STEP_SUMMARY"
