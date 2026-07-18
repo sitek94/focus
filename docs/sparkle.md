@@ -11,12 +11,25 @@ read_when:
 Focus uses Sparkle **2.9.4** at commit
 `b6496a74a087257ef5e6da1c5b29a447a60f5bd7` for direct Developer ID distribution.
 
+## Wiring (FocusMac only)
+
+Sparkle is linked through XcodeGen/`project.yml` as a remote Swift package on the
+`FocusMac` target only — not the portable SwiftPM package.
+
+- `UpdatePreferencesClient` owns `SPUStandardUpdaterController` on `@MainActor`.
+- Settings menu exposes automatic-check toggle + “Check for Updates…”.
+- Info.plist keys (via `project.yml`):
+  - `SUFeedURL` —
+    `https://github.com/sitek94/focus/releases/latest/download/appcast.xml`
+  - `SUPublicEDKey` — placeholder all-zero Ed25519 public key
+    (`AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=`). Replace with the real
+    public key before shipping signed updates.
+  - `SUEnableAutomaticChecks` — `YES` by default; user preference is Sparkle-owned.
+
 ## Pins and notices
 
-Recorded in `THIRD_PARTY_NOTICES.md`. Sparkle is Apple-only and is not linked
-from the shared SwiftPM package. FocusMac Swift sources are not wired to Sparkle
-in this CI/release-workflow checkpoint; appcast generation is release-pipeline
-only for now (`Scripts/release-generate-appcast.sh`).
+Recorded in `THIRD_PARTY_NOTICES.md`, including Sparkle’s bundled-component
+notices from the pinned commit.
 
 ## Keys and feed
 

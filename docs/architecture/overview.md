@@ -45,3 +45,16 @@ Portable code lives under `Sources/` and `CLI/FocusCLI/`. It must not import
   dump.
 - Project structure: `project.yml` + `Config/`; generated `Focus.xcodeproj` is
   ignored.
+
+### FocusMac owners (CP6/CP7)
+
+| Owner | Isolation | Domain |
+|---|---|---|
+| `FocusRuntimeOwner` | `@MainActor` | Current session, presentation directives, persistence commits |
+| `WakeScheduler` | actor | Single next-deadline wake task |
+| `ControlMailbox` + `ControlSocketServer` | actors | Socket accept/IO; mutations hop to MainActor |
+| `OverlaySessionCoordinator` | `@MainActor` | Multi-display break windows |
+| `WarningPanelCoordinator` | `@MainActor` | Compact warning panel |
+| `LaunchAtLoginClient` | `@MainActor` | `SMAppService.mainApp` status |
+| `UpdatePreferencesClient` | `@MainActor` | Sparkle updater preference/UI |
+| `CLIInstaller` | `@MainActor` | Symlink install/repair diagnostics |

@@ -5,47 +5,63 @@ import Foundation
 public struct ControlRequestProcessor: Sendable {
   public init() {}
 
+  public struct ProcessResult: Sendable {
+    public var response: ControlResponse
+    public var runtime: SessionRuntime?
+    public var events: [OutcomeEvent]
+
+    public init(
+      response: ControlResponse,
+      runtime: SessionRuntime?,
+      events: [OutcomeEvent] = []
+    ) {
+      self.response = response
+      self.runtime = runtime
+      self.events = events
+    }
+  }
+
   public func process(
     request: ControlRequest,
     runtime: SessionRuntime?,
     at now: Date,
     ids: inout IdentifierFactory,
     app: ControlAppInfo
-  ) -> (response: ControlResponse, runtime: SessionRuntime?) {
+  ) -> ProcessResult {
     guard request.protocol.isCompatibleMajor else {
-      return (
-        ControlResponse.failure(
+      return ProcessResult(
+        response: ControlResponse.failure(
           requestId: request.requestId,
           app: app,
           error: .protocolMismatch(),
           protocol: ControlProtocolInfo.current
         ),
-        runtime
+        runtime: runtime
       )
     }
 
     switch request.command {
     case .status:
       guard let runtime else {
-        return (
-          ControlResponse.failure(
+        return ProcessResult(
+          response: ControlResponse.failure(
             requestId: request.requestId,
             app: app,
             error: .appNotRunning()
           ),
-          nil
+          runtime: nil
         )
       }
       let state = ControlStateProjector.project(runtime: runtime, at: now)
-      return (
-        ControlResponse.success(
+      return ProcessResult(
+        response: ControlResponse.success(
           requestId: request.requestId,
           command: .status,
           performed: true,
           app: app,
           state: state
         ),
-        runtime
+        runtime: runtime
       )
 
     case .start, .pause, .resume, .skip, .triggerBreak, .snooze:
@@ -60,15 +76,16 @@ public struct ControlRequestProcessor: Sendable {
       case .performed, .noop:
         let performed = reduction.commandResult == .performed
         let state = ControlStateProjector.project(runtime: reduction.runtime, at: now)
-        return (
-          ControlResponse.success(
+        return ProcessResult(
+          response: ControlResponse.success(
             requestId: request.requestId,
             command: request.command,
             performed: performed,
             app: app,
             state: state
           ),
-          reduction.runtime
+          runtime: reduction.runtime,
+          events: reduction.events
         )
 
       case .rejected(let rejection):
@@ -83,14 +100,15 @@ public struct ControlRequestProcessor: Sendable {
           code = "rejected"
         }
         let state = ControlStateProjector.project(runtime: reduction.runtime, at: now)
-        return (
-          ControlResponse.failure(
+        return ProcessResult(
+          response: ControlResponse.failure(
             requestId: request.requestId,
             app: app,
             error: ControlErrorBody(code: code, message: message, retryable: false),
             state: state
           ),
-          reduction.runtime
+          runtime: reduction.runtime,
+          events: reduction.events
         )
       }
     }

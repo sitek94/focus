@@ -1,6 +1,7 @@
 name: Focus
 options:
   projectFormat: xcode16_3
+  developmentLanguage: en
   deploymentTarget:
     macOS: "26.0"
     iOS: "26.0"
@@ -26,6 +27,9 @@ settings:
 packages:
   Focus:
     path: .
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    revision: b6496a74a087257ef5e6da1c5b29a447a60f5bd7
 
 targets:
   FocusMac:
@@ -42,6 +46,8 @@ targets:
         product: FocusPersistence
       - package: Focus
         product: FocusControl
+      - package: Sparkle
+        product: Sparkle
       - target: FocusCLI
         embed: true
         codeSign: true
@@ -54,6 +60,11 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: Focus
         INFOPLIST_KEY_LSUIElement: YES
         INFOPLIST_KEY_NSHumanReadableCopyright: "Copyright © 2026 Maciek Sitkowski"
+        # Placeholder Ed25519 public key (all-zero). Replace before shipping updates.
+        # See docs/sparkle.md — private key never belongs in source.
+        INFOPLIST_KEY_SUPublicEDKey: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+        INFOPLIST_KEY_SUFeedURL: https://github.com/sitek94/focus/releases/latest/download/appcast.xml
+        INFOPLIST_KEY_SUEnableAutomaticChecks: YES
         COMBINE_HIDPI_IMAGES: YES
         LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/../Frameworks"
         CODE_SIGN_ENTITLEMENTS: Apps/Focus/FocusMac/Resources/FocusMac.entitlements
