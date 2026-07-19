@@ -6,7 +6,7 @@ import Foundation
   import Glibc
 #endif
 
-/// Connect / command / cold-start deadlines (PLAN §8).
+/// Connect / command / cold-start deadlines.
 public struct ControlTimeouts: Sendable, Equatable {
   public var connect: Duration
   public var command: Duration

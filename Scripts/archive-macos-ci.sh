@@ -38,7 +38,7 @@ if [[ "$status" -ne 0 ]]; then
   exit "$status"
 fi
 
-# Fail on Xcode project-format upgrade / migration warnings (A33 / PLAN §14).
+# Fail on Xcode project-format upgrade / migration warnings.
 if grep -Eiq \
   'upgrade.*(project|pbxproj)|project format|objectVersion|Migrate.*project|Update to recommended settings' \
   "$LOG"; then

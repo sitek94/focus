@@ -1,4 +1,4 @@
-# Focus PR / main CI — PLAN.md §14
+# Focus PR / main CI
 # Never signs, notarizes, tags, publishes, or modifies appcast on merge.
 name: CI
 

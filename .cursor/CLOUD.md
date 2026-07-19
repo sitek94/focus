@@ -11,8 +11,8 @@ The project-pinned Swift toolchain (**Swift 6.3.3**) is installed via
 [`swiftly`](https://www.swift.org/install/) under `~/.local/share/swiftly`. It is on
 `PATH` for both login shells (via `~/.profile`) and non-login shells (via `~/.bashrc`),
 so `swift` just works in new terminals. Confirm with `swift --version`. Do not upgrade it
-without also updating `PLAN.md`, package manifests, CI pins, and the toolchain documentation;
-upstream release pages can briefly disagree about the newest patch.
+without also updating package manifests, CI pins, `.swift-version`, and the toolchain
+documentation; upstream release pages can briefly disagree about the newest patch.
 
 ### Project target: iOS/macOS 26+, latest language features (private project)
 This is a private project targeting the latest OS versions with the newest Swift features.
@@ -66,17 +66,18 @@ Inspector, real multi-display and fullscreen/Spaces/Stage Manager behavior, Dock
 no-flash behavior, logout/login and login-item revocation, App Translocation and CLI
 install/repair, and signed/notarized Sparkle install/update testing.
 
-Local Mac setup is not a prerequisite for starting the foundation implementation. It can
-wait until the first interactive acceptance checkpoint. Apple Developer membership,
-bundle registration, Developer ID/notary credentials, Sparkle private keys, public feed
-hosting, and TestFlight setup can wait until release-focused work. The implementation PR
-does require working `macos-26` Actions access before its Apple portions can be accepted.
+Local Mac setup is not a prerequisite for starting portable work. Apple Developer
+membership, bundle registration, Developer ID/notary credentials, Sparkle private keys,
+public feed hosting, and TestFlight setup can wait until release-focused work. Apple
+portions of a PR require working `macos-26` Actions access before they can be accepted.
 
 ### Session bootstrap for external sources
-At the beginning of every session, before implementation or research:
+At the beginning of every session that needs external source inspection, before
+implementation or research:
 
-1. Read `PLAN.md` and inventory every external repository, skill source, or repo-backed
-   example needed for that session's checkpoints.
+1. Inventory every external repository, skill source, or repo-backed example needed for
+   that session’s work (pins and licenses live in `THIRD_PARTY_NOTICES.md` and the
+   relevant `docs/` page).
 2. Materialize all of those sources under `/workspace/tmp/references/`, one unique
    directory per repository and pinned full commit SHA, for example
    `tmp/references/avdlee-swiftui-agent-skill-f06d1437a3fb/`.
@@ -89,16 +90,15 @@ At the beginning of every session, before implementation or research:
    them. Copy or materially adapt nothing until the license at that exact SHA is compatible
    and the notice/header obligation is known.
 
-For the foundation implementation, clone the three adapted skill sources from `PLAN.md`
-before authoring `.agents/skills/`. Clone CodexBar, Justsayit, XcodeGen, Sparkle, or another
-reference only when the current checkpoint requires source inspection beyond the pinned
-plan. Normal SwiftPM dependency resolution is not a substitute for a reference clone when
-source or license inspection is required.
+Clone CodexBar, Justsayit, XcodeGen, Sparkle, or another reference only when the current
+work requires source inspection beyond what is already recorded in docs and notices.
+Normal SwiftPM dependency resolution is not a substitute for a reference clone when source
+or license inspection is required.
 
-`tmp/` is transient and must never be committed. Add `/tmp/` to `.gitignore` in the first
-implementation checkpoint. Use explicit-path `git add` commands, never `git add .`; before
-every commit, inspect `git diff --cached --name-only` and reject any `tmp/` path. The parent
-agent owns git commits and pushes; research subagents only report findings.
+`tmp/` is transient and must never be committed. Use explicit-path `git add` commands,
+never `git add .`; before every commit, inspect `git diff --cached --name-only` and reject
+any `tmp/` path. The parent agent owns git commits and pushes; research subagents only
+report findings.
 
 ### Common commands (run from a package dir containing `Package.swift`)
 - Build: `swift build`
@@ -107,12 +107,12 @@ agent owns git commits and pushes; research subagents only report findings.
 - Lint: `swift format lint --recursive Sources Tests`
 - Auto-format: `swift format --in-place --recursive Sources Tests`
 
+Canonical Focus commands live in the root `Makefile` and `AGENTS.md` (`make verify-linux`,
+`make test-linux`, and related targets).
+
 ### Notes / gotchas
 - `swift format` is bundled with the toolchain (no separate install). Its default style is
   **2-space indentation**, which differs from the 4-space style in `swift package init`
   templates — expect indentation warnings on freshly scaffolded code until formatted.
 - To start a new package: `swift package init --type executable` (or `--type library`).
 - The build cache lives in `.build/`; delete it (`rm -rf .build`) if you hit stale-build issues.
-- Before implementation checkpoint 2, the repo root may not contain `Package.swift`; run
-  SwiftPM commands from the active package directory. The planned foundation creates the
-  canonical root package, after which the repository-root commands in `PLAN.md` apply.

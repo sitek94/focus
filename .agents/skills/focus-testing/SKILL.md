@@ -18,7 +18,7 @@ description: >
 | Disposition  | **adapted** (not copied)                                                                                                       |
 | Source paths | `swift-testing-pro/skills/swift-testing-pro/SKILL.md`; `references/core-rules.md`; `writing-better-tests.md`; `async-tests.md` |
 
-Materially rewritten to route agents to Focus’s suites and CI boundaries (`PLAN.md` §12, `docs/testing.md`). Upstream feature-catalog dumps and XCTest migration essays are omitted unless a file still uses XCTest.
+Materially rewritten to route agents to Focus’s suites and CI boundaries (`docs/testing.md`). Upstream feature-catalog dumps and XCTest migration essays are omitted unless a file still uses XCTest.
 
 ## Defaults
 

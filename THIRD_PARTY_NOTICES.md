@@ -1,8 +1,19 @@
 # Third-party notices
 
 This file records licenses and provenance for third-party code that Focus
-distributes or materially adapts. Classifications follow `PLAN.md` §18:
-`copied`, `adapted`, or `pattern/inspiration`.
+distributes or materially adapts. Use these labels consistently:
+
+| Classification | Meaning | Obligation |
+|---|---|---|
+| copied | Verbatim code/text | Preserve required headers and license notice; record exact path and SHA |
+| adapted | Substantial source-derived rewrite | Record upstream URL, exact SHA/source paths, and the required MIT notice here |
+| pattern/inspiration | Independently written implementation of a general idea/workflow | Cite in design docs when useful; do not imply copied authorship |
+
+CodexBar and Justsayit remain MIT pattern references unless implementation later
+copies material. LookAway contributes only a public workflow shape; never copy
+its words, branding, assets, screenshots, or visual design. XcodeGen is a
+development tool and Sparkle is a distributed dependency; distinguish those
+notice categories. Never copy material without a verified compatible license.
 
 ## Distributed dependencies
 
