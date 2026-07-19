@@ -111,7 +111,7 @@ verify-apple: require-macos log-apple-toolchain select-xcode ## Full Apple gate:
 	$(MAKE) smoke-ios
 	$(MAKE) archive-macos ARCHIVE_MODE=ci
 
-release-check: ## Tag/changelog/version/key checks (VERSION=x.y.z; no publish)
+release-check: ## Tag/version/key checks (VERSION=x.y.z; no publish)
 	@if [[ -z "$(VERSION)" ]]; then \
 		echo "usage: make release-check VERSION=0.1.0" >&2; \
 		exit 1; \

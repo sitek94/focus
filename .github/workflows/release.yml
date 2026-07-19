@@ -70,7 +70,7 @@ jobs:
           FOCUS_REQUIRE_SIGNED_TAG: "1"
         run: ./Scripts/verify-signed-tag.sh "${FOCUS_RELEASE_TAG}"
 
-      - name: Version / changelog / marketing version checks
+      - name: Version / marketing version checks
         env:
           FOCUS_REQUIRE_RELEASE_SECRETS: "1"
         run: make release-check VERSION="${FOCUS_RELEASE_VERSION}"
@@ -149,7 +149,7 @@ jobs:
           gh release create "${FOCUS_RELEASE_TAG}" \
             --draft \
             --title "Focus ${FOCUS_RELEASE_VERSION}" \
-            --notes-file CHANGELOG.md \
+            --generate-notes \
             "${assets[@]}"
           echo "release: draft GitHub Release created for ${FOCUS_RELEASE_TAG}"
           echo "release: upload order is DMG first, then appcast.xml when present"

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Validate tag/changelog/version consistency without publishing.
+# Validate tag/version consistency without publishing.
 # Usage: Scripts/release-check.sh 0.1.0
 # Optional: FOCUS_REQUIRE_RELEASE_SECRETS=1 to require signing/notary/Sparkle secrets.
 set -euo pipefail
@@ -23,7 +23,6 @@ echo "release-check: validating ${TAG} / ${VERSION}"
 
 required_files=(
   LICENSE
-  CHANGELOG.md
   project.yml
   Package.swift
   Config/Shared.xcconfig
@@ -37,11 +36,6 @@ for path in "${required_files[@]}"; do
     exit 1
   fi
 done
-
-if ! grep -Eq "^## \[${VERSION}\]" CHANGELOG.md; then
-  echo "error: CHANGELOG.md lacks an explicit '## [${VERSION}]' section" >&2
-  exit 1
-fi
 
 marketing_yml="$(
   awk -F'"' '/MARKETING_VERSION:/ { print $2; exit }' project.yml
@@ -94,14 +88,13 @@ if grep -Fq "SUPublicEDKey: ${placeholder_edkey}" project.yml \
     echo "error: SUPublicEDKey is still the all-zero placeholder; replace before a real release" >&2
     exit 1
   fi
-  echo "release-check: note: SUPublicEDKey is the documented all-zero placeholder (ok until release prep)"
+  echo "release-check: note: SUPublicEDKey is still the all-zero placeholder (ok until release prep)"
 elif ! grep -RFq "SUPublicEDKey" Apps Config project.yml 2>/dev/null; then
   echo "release-check: note: SUPublicEDKey not wired into app sources yet"
 fi
 
-feed_url="https://github.com/sitek94/focus/releases/latest/download/appcast.xml"
-if grep -Fq "$feed_url" docs/sparkle.md; then
-  echo "release-check: documented Sparkle feed URL present"
+if grep -Eq 'INFOPLIST_KEY_SUFeedURL:[[:space:]]*https://' project.yml; then
+  echo "release-check: Sparkle feed URL present in project.yml"
 fi
 
 check_secret_name() {

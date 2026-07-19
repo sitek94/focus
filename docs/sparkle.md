@@ -1,5 +1,5 @@
 ---
-summary: "Sparkle 2.9.4 key handling, appcast generation, feed hosting, and update smoke expectations."
+summary: "Sparkle key handling, appcast generation, feed hosting, and update smoke expectations."
 read_when:
   - "Wiring Sparkle into FocusMac"
   - "Generating or hosting appcast.xml"
@@ -8,33 +8,23 @@ read_when:
 
 # Sparkle updates
 
-Focus uses Sparkle **2.9.4** at commit
-`b6496a74a087257ef5e6da1c5b29a447a60f5bd7` for direct Developer ID distribution.
+Sparkle is a remote package on the `FocusMac` target only (pin and Info.plist
+keys live in `project.yml`). It is not part of the portable SwiftPM graph.
 
-## Wiring (FocusMac only)
-
-Sparkle is linked through XcodeGen/`project.yml` as a remote Swift package on the
-`FocusMac` target only — not the portable SwiftPM package.
+## Wiring
 
 - `UpdatePreferencesClient` owns `SPUStandardUpdaterController` on `@MainActor`.
 - Settings menu exposes automatic-check toggle + “Check for Updates…”.
-- Info.plist keys (via `project.yml`):
-  - `SUFeedURL` —
-    `https://github.com/sitek94/focus/releases/latest/download/appcast.xml`
-  - `SUPublicEDKey` — placeholder all-zero Ed25519 public key
-    (`AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=`). Replace with the real
-    public key before shipping signed updates.
-  - `SUEnableAutomaticChecks` — `YES` by default; user preference is Sparkle-owned.
+- Replace the placeholder `SUPublicEDKey` in `project.yml` before shipping
+  signed updates. Private key never belongs in source.
 
 ## Keys and feed
 
 - Ed25519 private key stays in release secret `SPARKLE_ED25519_PRIVATE_KEY`;
   only the public key belongs in app configuration (`SUPublicEDKey`).
 - `appcast.xml` is a release artifact (gitignored), not hand-edited source.
-- Proposed feed:
-  `https://github.com/sitek94/focus/releases/latest/download/appcast.xml`
-  (requires publicly readable release assets).
-- Minimum system `26.0`, hardware `arm64`.
+- Feed URL must stay publicly readable (currently GitHub Releases
+  `…/latest/download/appcast.xml`; see `SUFeedURL` in `project.yml`).
 - `generate_appcast` runs in `release.yml` only when the private key secret is
   present; otherwise the step skips with a clear log.
 

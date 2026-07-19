@@ -1,5 +1,5 @@
 ---
-summary: "ADR: use XcodeGen 2.46.0 with xcode16_3; single checked-in Xcode fallback if Mac gate fails."
+summary: "ADR: generate Focus.xcodeproj with pinned XcodeGen; single checked-in Xcode fallback if Mac gate fails."
 read_when:
   - "Changing project.yml or tools/projectgen"
   - "Considering Tuist, checked-in pbxproj, or dual generation strategies"
@@ -10,23 +10,24 @@ read_when:
 
 ## Status
 
-Accepted for the foundation PR, conditional on the first macOS CI gate.
+Accepted, conditional on macOS CI continuing to generate and build cleanly.
 
 ## Decision
 
-Use **XcodeGen 2.46.0** pinned at
-`8445e778451c7e44237b90281bde622d764b0084` via `tools/projectgen/Package.swift`.
-Set `options.projectFormat: xcode16_3`. Do not commit `Focus.xcodeproj`.
+Generate `Focus.xcodeproj` with XcodeGen. The revision pin lives in
+`tools/projectgen/Package.swift` (and the pin constant there). Keep
+`options.projectFormat` as set in `project.yml`. Do not commit the generated
+project.
 
 ## Consequences
 
-- Linux can prove generator syntax and determinism only.
-- First Mac CI must generate cleanly, keep the project untracked, build
-  `FocusMac` and `FocusIOS`, archive `FocusMac`, and fail on project-format
-  upgrade warnings.
-- If XcodeGen cannot represent the required Xcode 26 project, replace it once
-  with a checked-in native Xcode 26 project and update this ADR. Do not patch
-  generated `.pbxproj` files or maintain both strategies.
+- Linux proves generator syntax and determinism only.
+- Mac CI must generate cleanly, keep the project untracked, build `FocusMac`
+  and `FocusIOS`, archive `FocusMac`, and fail on project-format upgrade
+  warnings.
+- If XcodeGen cannot represent the required Xcode project, replace it once
+  with a checked-in native project and update this ADR. Do not patch generated
+  `.pbxproj` files or maintain both strategies.
 
 ## Rejected
 
