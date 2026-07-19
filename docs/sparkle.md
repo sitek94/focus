@@ -8,6 +8,8 @@ read_when:
 
 # Sparkle updates
 
+Audience: contributors wiring or debugging FocusMac auto-update.
+
 Sparkle is a remote package on the `FocusMac` target only (pin and Info.plist
 keys live in `project.yml`). It is not part of the portable SwiftPM graph.
 
@@ -15,12 +17,12 @@ keys live in `project.yml`). It is not part of the portable SwiftPM graph.
 
 - `UpdatePreferencesClient` owns `SPUStandardUpdaterController` on `@MainActor`
   and implements `SPUUpdaterDelegate`.
-- Settings menu exposes automatic-check toggle, “Check for Updates…”, and a
+- Settings menu exposes an automatic-check toggle, “Check for Updates…”, and a
   build label (`Focus <marketing> (<build>) · <short commit>`).
-- Info.plist keys live in `Apps/Focus/FocusMac/Resources/Info.plist` (also
-  declared under `info.properties` in `project.yml`). Do **not** use
+- Sparkle keys live in `Apps/Focus/FocusMac/Resources/Info.plist` (also
+  declared under `info.properties` in `project.yml`). Do not use
   `INFOPLIST_KEY_SU*` — Xcode’s generated Info.plist path silently drops
-  unknown keys (that shipped builds 5–6 without a feed URL).
+  unknown keys.
   - `SUPublicEDKey` — live Ed25519 public key (private key never in source)
   - `SUFeedURL` — public GitHub Releases `…/latest/download/appcast.xml`
   - `SUEnableAutomaticChecks` / `SUAutomaticallyUpdate` — automatic silent updates
@@ -33,9 +35,9 @@ keys live in `project.yml`). It is not part of the portable SwiftPM graph.
 
 Focus is a menu-bar app that rarely quits. When Sparkle schedules a silent
 install-on-quit, `UpdatePreferencesClient` takes control via
-`willInstallUpdateOnQuit` and calls the immediate install handler only when
-the session is not in warning or break. Pending installs retry after phase
-changes and on app activation. A background check also runs on launch and
+`willInstallUpdateOnQuit` and calls the immediate install handler only when no
+warning or break UI is active. Pending installs retry after those UI states
+clear and on app activation. A background check also runs on launch and
 activation when no Sparkle session is in progress.
 
 ## Keys and feed
@@ -50,3 +52,5 @@ activation when no Sparkle session is in progress.
 
 End-to-end update from an older signed build is credentialed Mac acceptance, not
 a Linux check. Never put a GitHub token in the app.
+
+See [release-macos.md](./release-macos.md) for the publish loop.

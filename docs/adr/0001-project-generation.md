@@ -32,5 +32,5 @@ project.
 ## Rejected
 
 - Pure SwiftPM packaging for the whole app (cannot model bundles/UI tests).
-- Tuist for v1 (heavier; local generate remains macOS-oriented).
+- Tuist (heavier; local generate remains macOS-oriented).
 - Hand-maintained `.pbxproj` as the default (opaque Linux edits).

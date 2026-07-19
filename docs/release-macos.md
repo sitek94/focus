@@ -8,31 +8,41 @@ read_when:
 
 # Releasing (macOS)
 
-Continuous deployment on push to `main` (path-scoped). No signed tags, no
-changelog ceremony. Marketing version stays in `Config/Shared.xcconfig`
-(`0.1.0` until a manual milestone bump). Build number is the GitHub Actions
-run number.
+Audience: contributors changing macOS deploy, signing, or Sparkle publish.
+
+Continuous deployment on path-filtered push to `main`, plus manual
+`workflow_dispatch`. Marketing version stays in `Config/Shared.xcconfig` (and
+the deploy workflow `MARKETING_VERSION` env) until you bump it for a milestone.
+Build number is the GitHub Actions run number. Commit hash is embedded as
+`FOCUS_GIT_COMMIT`.
 
 ## Loop
 
-1. Commit + push to `main` (paths under FocusMac / shared Sources / Config / …).
-2. `.github/workflows/deploy-macos.yml` runs:
+1. Push to `main` on paths under FocusMac, shared Sources, Config, project
+   generation, or the deploy scripts/workflow (see
+   `.github/workflows/deploy-macos.yml`).
+2. Deploy macOS runs on `macos-26`:
    - selects pinned Xcode (`.xcode-version`), regenerates `Focus.xcodeproj`
    - imports Developer ID, archives, notarizes, generates Sparkle `appcast.xml`
-   - publishes a GitHub Release `macos-build-<run_number>` with `--generate-notes`
-     (DMG + `appcast.xml`) and marks it `--latest`
-3. Installed apps pick up the update via Sparkle (see `docs/sparkle.md`).
-4. Never ship iOS artifacts from this workflow (guarded). See `docs/release-ios.md`.
+   - publishes a GitHub Release `macos-build-<run_number>` with
+     `--generate-notes` (DMG + `appcast.xml`) and marks it `--latest`
+3. Installed apps pick up the update via Sparkle (see [sparkle.md](./sparkle.md)).
 
-Manual force: Actions → **Deploy macOS** → **Run workflow**.
+Force a run: Actions → Deploy macOS → Run workflow.
+
+This workflow must not ship iOS artifacts (guarded in the job). iOS deploy:
+[release-ios.md](./release-ios.md).
 
 ## CI vs deploy
 
 | Surface | Workflow | Signing / secrets |
 |---|---|---|
 | Push / PR health | `.github/workflows/ci.yml` | `contents: read`; unsigned archive gate; no release secrets |
-| Continuous deploy | `.github/workflows/deploy-macos.yml` | Requires signing + notary + Sparkle secrets; fails closed if missing |
-| Legacy tag cut | `.github/workflows/release.yml` | Optional secrets; skipped when absent — delete in Phase 4 |
+| Continuous deploy | `.github/workflows/deploy-macos.yml` | Requires signing, notary, and Sparkle secrets; fails closed if missing |
+| Manual tag release | `.github/workflows/release.yml` | `workflow_dispatch` with an existing `vX.Y.Z` tag; optional secrets skip steps when absent |
+
+Deploys do not wait on `ci.yml`. CI is a health signal; deploy builds what it
+ships.
 
 ## Prerequisites
 
@@ -48,4 +58,6 @@ Do not create both a secret and a variable for the same identifier. The workflow
 uses its scoped built-in `GITHUB_TOKEN`; no personal access token is required.
 
 Supporting scripts: `Scripts/release-*.sh`, `Scripts/ci-install-sparkle-tools.sh`,
-`Scripts/archive-macos-ci.sh`. Sparkle keys and feed hosting: `docs/sparkle.md`.
+`Scripts/archive-macos-ci.sh`. Sparkle keys and feed hosting:
+[sparkle.md](./sparkle.md). Dry-run checks without publishing:
+`make release-check VERSION=x.y.z`.

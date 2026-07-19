@@ -8,30 +8,35 @@ read_when:
 
 # Releasing (iOS)
 
-Continuous deployment on push to `main` (path-scoped). Internal TestFlight
-only — no Beta App Review. Marketing version stays in `Config/Shared.xcconfig`
-(`0.1.0` until a manual milestone bump). Build number is the GitHub Actions
-run number.
+Audience: contributors changing iOS deploy or TestFlight wiring.
+
+Continuous deployment on path-filtered push to `main`, plus manual
+`workflow_dispatch`. Internal TestFlight only—no Beta App Review. Marketing
+version stays in `Config/Shared.xcconfig` (and the deploy workflow
+`MARKETING_VERSION` env) until you bump it for a milestone. Build number is the
+GitHub Actions run number.
 
 ## Loop
 
-1. Commit + push to `main` (paths under FocusIOS / shared Sources / Config / …).
-2. `.github/workflows/deploy-ios.yml` runs:
+1. Push to `main` on paths under FocusIOS, shared Sources, Config, project
+   generation, or the deploy scripts/workflow (see
+   `.github/workflows/deploy-ios.yml`).
+2. Deploy iOS runs on `macos-26`:
    - selects pinned Xcode (`.xcode-version`), regenerates `Focus.xcodeproj`
-   - archives `FocusIOS` with App Store Connect API auth + automatic signing
+   - archives `FocusIOS` with App Store Connect API auth and automatic signing
      (`-allowProvisioningUpdates`)
    - exports with `destination: upload` and
      `testFlightInternalTestingOnly: true` → App Store Connect / TestFlight
-3. Install / update from the TestFlight app on the device (enable automatic
+3. Install or update from the TestFlight app on the device (enable automatic
    updates for Focus).
 
-Manual force: Actions → **Deploy iOS** → **Run workflow**.
+Force a run: Actions → Deploy iOS → Run workflow.
 
 ## Prerequisites
 
-One-time App Store Connect setup (owner):
+One-time App Store Connect setup:
 
-1. Register / create app with bundle id `com.macieksitkowski.focus.ios`.
+1. Register the app with bundle id `com.macieksitkowski.focus.ios`.
 2. Add yourself to an internal TestFlight group; enable automatic distribution.
 3. On iPhone: install TestFlight, install Focus, enable automatic updates.
 
@@ -46,9 +51,7 @@ Supporting script: `Scripts/release-ios-archive-upload.sh`. Export options:
 
 ## Notes
 
-- No Sparkle-style self-update on iOS; Apple prohibits self-updating binaries.
+- iOS has no Sparkle-style self-update; Apple prohibits self-updating binaries.
 - Internal TestFlight builds expire after 90 days; continuous deploys keep a
   fresh build available.
-- Cloud signing on the hosted runner is the least-proven step; if it fails,
-  fall back to an explicit Apple Distribution cert + profile (same pattern as
-  the macOS Developer ID import).
+- macOS continuous deploy is separate: [release-macos.md](./release-macos.md).

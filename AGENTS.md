@@ -1,10 +1,11 @@
 # Focus agent guide
 
-## Before architecture, testing, or release work
+## Before layout, testing, or release work
 
 Run `make docs-list` and read every doc whose `read_when` matches the task.
 Keep commands here and in the `Makefile`; put detailed rationale in the owning
-`docs/` page.
+`docs/` page. Doc map: [`docs/index.md`](./docs/index.md). Writing rules:
+[`docs/writing-documentation.md`](./docs/writing-documentation.md).
 
 ## Canonical commands
 
@@ -51,23 +52,17 @@ not reintroduce an x86_64 slice.
 | Docs, license, format | Sparkle install/update, notarization, VoiceOver |
 | Deterministic XcodeGen generation (syntax only) | Generated project compatibility with pinned Xcode |
 
-Linux generation does **not** prove Xcode can build the project. Do not import
-`SwiftUI`, `AppKit`, or `UIKit` from `Sources/` or `CLI/`.
+Linux generation does not prove Xcode can build the project. Do not import
+`SwiftUI`, `AppKit`, or `UIKit` from `Sources/` or `CLI/`. Detail:
+[`docs/layout.md`](./docs/layout.md).
 
 Cursor Cloud agents: see `.cursor/CLOUD.md` for the Linux toolchain and Apple
 SDK boundary.
 
-## Feature-first rules
+## Contributing rules
 
 - One owner per state domain; thin views; isolated services/actors.
-- Fixed timing only (20m focus / 10s warning / 20s break / 60s snooze) — never
-  preferences, CLI flags, or settings knobs for durations.
-- No stats, history UI, blocking, gamification, telemetry, accounts, Homebrew,
-  or website in this slice.
 - Prefer Swift Testing on portable suites; XCUITest only for minimal Apple smoke.
-
-## Generated-project rules
-
 - Edit `project.yml` and `Config/*.xcconfig`, never hand-edit generated
   `Focus.xcodeproj`.
 - `Focus.xcodeproj` is gitignored and must stay untracked.
