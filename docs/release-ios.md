@@ -26,4 +26,3 @@ No iOS release pipeline exists yet. `FocusIOS` is built and smoke-tested only;
 - Lift or scope the `release.yml` iOS-artifact guard.
 - Decide whether Xcode Cloud triggers off the same signed tag as macOS release,
   or independently off `main`/a branch.
-- Update the docs-map row in `AGENTS.md` once the pipeline is real.

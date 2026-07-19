@@ -82,23 +82,3 @@ SDK boundary.
 Swift 6 mode is mandatory. Reject `@unchecked Sendable`, `nonisolated(unsafe)`,
 `MainActor.assumeIsolated`, and `@preconcurrency` in shipped/test Swift
 (`make lint` / `Scripts/check-concurrency-safety.swift`).
-
-## Docs map
-
-| Path | Owns |
-|---|---|
-| `docs/architecture/overview.md` | Targets, IDs, ownership |
-| `docs/architecture/session.md` | State machine and time |
-| `docs/architecture/cli.md` | CLI/IPC contract |
-| `docs/testing.md` | Test lanes |
-| `docs/release-macos.md` | macOS release checklist |
-| `docs/release-ios.md` | iOS release path (planned, not implemented) |
-| `docs/sparkle.md` | Updates / appcast |
-| `docs/adr/0001-project-generation.md` | XcodeGen decision |
-| `docs/adr/0002-cli-ipc.md` | Socket IPC decision |
-
-## Git hygiene
-
-- Never commit `tmp/`, `/tmp/` research clones, or `Focus.xcodeproj`.
-- Use explicit-path `git add`; inspect `git diff --cached --name-only` before
-  every commit.
