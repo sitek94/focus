@@ -48,7 +48,7 @@ not reintroduce an x86_64 slice.
 |---|---|
 | Portable `FocusSession`, `FocusPersistence`, `FocusControl`, `focus` CLI | `FocusMac` / `FocusIOS` builds, archives, UI tests |
 | Linux SQLite + Unix-socket CLI integration tests | Darwin IPC (`getpeereid`), login item, overlays |
-| Docs, license notices, format | Sparkle install/update, notarization, VoiceOver |
+| Docs, license, format | Sparkle install/update, notarization, VoiceOver |
 | Deterministic XcodeGen generation (syntax only) | Generated project compatibility with Xcode 26 |
 
 Linux generation does **not** prove Xcode can build the project. Do not import

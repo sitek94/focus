@@ -28,7 +28,7 @@ public enum ControlSocketPathError: Error, Sendable, Equatable {
   case lstatFailed(URL, errno: Int32)
 }
 
-/// Shared socket filename and path rules (PLAN §8).
+/// Shared socket filename and path rules.
 public enum ControlSocketPath: Sendable {
   /// Flat socket filename under the per-user temp directory.
   public static let fileName = "com.macieksitkowski.focus.macos.control.sock"

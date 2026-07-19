@@ -1,7 +1,7 @@
 import FocusControl
 import Foundation
 
-/// Human-readable stdout/stderr lines matching PLAN §8 samples.
+/// Human-readable stdout/stderr lines for the focus CLI.
 enum HumanOutput {
   static func successLine(command: ControlCommandName, response: ControlResponse) -> String {
     guard let state = response.state else {

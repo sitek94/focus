@@ -1,4 +1,4 @@
-# Focus macOS release — PLAN.md §15
+# Focus macOS release
 # Manual only (workflow_dispatch). Never uploads or releases the iOS shell.
 #
 # Secrets / variables are OPTIONAL until a real credentialed release:
@@ -145,7 +145,7 @@ jobs:
           if [[ -f build/release/appcast.xml ]]; then
             assets+=(build/release/appcast.xml)
           fi
-          # Draft only — publish after manual install/update smoke (PLAN §15 step 11).
+          # Draft only — publish after manual install/update smoke (see docs/release-macos.md).
           gh release create "${FOCUS_RELEASE_TAG}" \
             --draft \
             --title "Focus ${FOCUS_RELEASE_VERSION}" \

@@ -270,7 +270,7 @@ public struct ControlResponse: Codable, Sendable, Equatable {
   }
 }
 
-/// Process exit codes from PLAN §8.
+/// Process exit codes for the focus CLI contract.
 public enum ControlExitCode: Int32, Sendable, Equatable {
   case success = 0
   case internalError = 1

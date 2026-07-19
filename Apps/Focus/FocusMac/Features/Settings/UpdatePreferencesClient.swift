@@ -1,7 +1,7 @@
 import Foundation
 import Sparkle
 
-/// Wraps Sparkle’s automatic-check preference and updater UI (PLAN §9).
+/// Wraps Sparkle’s automatic-check preference and updater UI.
 @MainActor
 final class UpdatePreferencesClient {
   private let controller: SPUStandardUpdaterController

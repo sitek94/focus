@@ -44,13 +44,17 @@ modifies `appcast.xml` on merge.
 
 ## Prerequisites
 
-Owner-supplied (see `PLAN.md` §15 for the full matrix):
+Owner-supplied repository configuration (never put secret values in source):
 
 - Secrets: `APPLE_DEVELOPER_ID_APPLICATION_P12_BASE64`,
   `APPLE_DEVELOPER_ID_APPLICATION_P12_PASSWORD`, `APPLE_NOTARY_API_PRIVATE_KEY`,
   `SPARKLE_ED25519_PRIVATE_KEY`
 - Variables: `APPLE_TEAM_ID`, `APPLE_NOTARY_API_KEY_ID`,
   `APPLE_NOTARY_API_ISSUER_ID`
+
+Do not create both a secret and a variable for the same identifier. The workflow
+uses its scoped built-in `GITHUB_TOKEN`; no personal access token is an app or
+release prerequisite.
 
 Supporting scripts live under `Scripts/release-*.sh`,
 `Scripts/verify-signed-tag.sh`, and `Scripts/archive-macos-ci.sh`. Details for

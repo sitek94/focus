@@ -1,6 +1,6 @@
 import XCTest
 
-/// Minimal macOS launch / menu smoke (PLAN §12).
+/// Minimal macOS launch / menu smoke.
 ///
 /// Stable accessibility identifiers on FocusMac:
 /// - `focus.mac.menubar.status` — MenuBarExtra label

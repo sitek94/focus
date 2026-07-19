@@ -1,7 +1,7 @@
 import Foundation
 import ServiceManagement
 
-/// Injected seam over `SMAppService.mainApp` (PLAN §9).
+/// Injected seam over `SMAppService.mainApp`.
 @MainActor
 final class LaunchAtLoginClient {
   enum Status: Equatable, Sendable {

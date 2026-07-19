@@ -39,4 +39,4 @@ See `AGENTS.md` for the full command index and proof boundary. Run
 
 ## License
 
-MIT. See `LICENSE` and `THIRD_PARTY_NOTICES.md`.
+MIT. See `LICENSE`.

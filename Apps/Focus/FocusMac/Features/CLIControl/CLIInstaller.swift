@@ -1,6 +1,6 @@
 import Foundation
 
-/// Installs / repairs the user-owned `focus` CLI symlink (PLAN §8 install story).
+/// Installs / repairs the user-owned `focus` CLI symlink.
 @MainActor
 final class CLIInstaller {
   enum State: Equatable, Sendable {

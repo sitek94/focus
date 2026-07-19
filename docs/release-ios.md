@@ -35,5 +35,5 @@ approach so the eventual implementation isn't designed from scratch.
 - Lift or scope the `release.yml` iOS-artifact guard once this path exists.
 - Decide whether Xcode Cloud triggers off the same signed tag as
   `docs/release-macos.md`, or independently off `main`/a branch.
-- Add the doc-map rows in `AGENTS.md` / `PLAN.md` §16 pointing here (already
-  present) and drop this TODO framing once the pipeline is real.
+- Confirm the doc-map rows in `AGENTS.md` still point here and drop this TODO
+  framing once the pipeline is real.

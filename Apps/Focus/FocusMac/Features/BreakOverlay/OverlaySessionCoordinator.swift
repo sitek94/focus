@@ -2,7 +2,7 @@ import AppKit
 import CoreGraphics
 import Foundation
 
-/// `@MainActor` owner of multi-display break overlay windows (PLAN §10).
+/// `@MainActor` owner of multi-display break overlay windows.
 @MainActor
 final class OverlaySessionCoordinator {
   var onUserSkip: (@MainActor () async -> Void)?
