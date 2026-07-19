@@ -89,6 +89,12 @@ targets:
     dependencies:
       - package: Focus
         product: FocusSession
+    # Custom Focus keys must live in a real Info.plist — Xcode's
+    # GENERATE_INFOPLIST_FILE INFOPLIST_KEY_* path silently drops unknown keys.
+    info:
+      path: Apps/Focus/FocusIOS/Resources/Info.plist
+      properties:
+        FocusGitCommit: $(FOCUS_GIT_COMMIT)
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.macieksitkowski.focus.ios

@@ -5,9 +5,9 @@ import XCTest
 /// Stable accessibility identifiers on FocusIOS:
 /// - `focus.ios.root` — root scene container
 /// - `focus.ios.brand` — brand title ("Focus")
-/// - `focus.ios.status` — non-released shell status placeholder
+/// - `focus.ios.version` — marketing version / build / commit label
 final class FocusIOSUITests: XCTestCase {
-  func testLaunchShowsRootSceneStatusPlaceholder() throws {
+  func testLaunchShowsRootSceneVersionLabel() throws {
     let app = XCUIApplication()
     app.launch()
 
@@ -18,11 +18,15 @@ final class FocusIOSUITests: XCTestCase {
     XCTAssertTrue(brand.waitForExistence(timeout: 5), "Expected focus.ios.brand")
     XCTAssertEqual(brand.label, "Focus")
 
-    let status = app.staticTexts["focus.ios.status"]
-    XCTAssertTrue(status.waitForExistence(timeout: 5), "Expected focus.ios.status")
+    let version = app.staticTexts["focus.ios.version"]
+    XCTAssertTrue(version.waitForExistence(timeout: 5), "Expected focus.ios.version")
     XCTAssertTrue(
-      status.label.contains("Non-released iOS shell"),
-      "Status should state the iOS shell is non-released; got: \(status.label)"
+      version.label.hasPrefix("Focus "),
+      "Version label should start with Focus; got: \(version.label)"
+    )
+    XCTAssertTrue(
+      version.label.contains("(") && version.label.contains(")"),
+      "Version label should include a build number in parentheses; got: \(version.label)"
     )
   }
 }

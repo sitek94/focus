@@ -1,7 +1,7 @@
 import FocusSession
 import SwiftUI
 
-/// Minimal iOS root scene: brand plus non-released shell status placeholder.
+/// Minimal iOS root scene: brand plus build / version label.
 struct FocusIOSRootView: View {
   private let copy = FocusIOSShellCopy()
 
@@ -14,11 +14,11 @@ struct FocusIOSRootView: View {
         .font(.largeTitle.weight(.semibold))
         .accessibilityIdentifier(FocusIOSAccessibility.brand)
 
-      Text(copy.status)
+      Text(BuildInfo.label)
         .font(.body)
         .multilineTextAlignment(.center)
         .foregroundStyle(.secondary)
-        .accessibilityIdentifier(FocusIOSAccessibility.status)
+        .accessibilityIdentifier(FocusIOSAccessibility.version)
     }
     .padding()
     .frame(maxWidth: .infinity, maxHeight: .infinity)
