@@ -7,6 +7,7 @@ IOS_DESTINATION ?=
 
 .PHONY: help docs-list format lint generate-project \
 	assert-swift-toolchain assert-generated-project assert-hardened-runtime \
+	assert-sparkle-info-plist \
 	test-linux test-session test-persistence test-control test-cli test-platform-gating \
 	log-apple-toolchain select-xcode select-ios-simulator \
 	build-macos build-ios test-macos-integration smoke-macos smoke-ios archive-macos \
@@ -38,6 +39,9 @@ assert-generated-project: ## Assert objectVersion=90 and project untracked
 
 assert-hardened-runtime: ## Assert FocusMac + FocusCLI enable hardened runtime
 	./Scripts/assert-hardened-runtime.sh
+
+assert-sparkle-info-plist: ## Assert Sparkle keys live in FocusMac Info.plist
+	./Scripts/assert-sparkle-info-plist.sh
 
 test-linux: ## Run portable SwiftPM tests (swift test)
 	swift test
@@ -99,7 +103,7 @@ archive-macos: require-macos select-xcode generate-project ## Archive FocusMac (
 		xcodebuild -project Focus.xcodeproj -scheme FocusMac -archivePath build/Focus.xcarchive archive; \
 	fi
 
-verify-linux: assert-swift-toolchain docs-list lint assert-hardened-runtime ## Full Linux gate: toolchain, docs, lint, build, tests
+verify-linux: assert-swift-toolchain docs-list lint assert-hardened-runtime assert-sparkle-info-plist ## Full Linux gate: toolchain, docs, lint, build, tests
 	swift build
 	swift test
 

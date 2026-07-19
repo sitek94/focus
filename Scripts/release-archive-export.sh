@@ -108,6 +108,21 @@ if grep -Eq 'Signature=adhoc|Authority=Sign to Run Locally' <<<"$signing_info"; 
   exit 1
 fi
 
+# Custom Sparkle keys are easy to lose with GENERATE_INFOPLIST_FILE — verify
+# the exported app actually carries the feed URL before we notarize/publish.
+INFO_PLIST="${APP_PATH}/Contents/Info.plist"
+feed_url="$(/usr/libexec/PlistBuddy -c 'Print :SUFeedURL' "$INFO_PLIST" 2>/dev/null || true)"
+if [[ -z "$feed_url" ]]; then
+  echo "error: exported Focus.app Info.plist is missing SUFeedURL" >&2
+  exit 1
+fi
+pub_key="$(/usr/libexec/PlistBuddy -c 'Print :SUPublicEDKey' "$INFO_PLIST" 2>/dev/null || true)"
+if [[ -z "$pub_key" ]]; then
+  echo "error: exported Focus.app Info.plist is missing SUPublicEDKey" >&2
+  exit 1
+fi
+echo "release-archive-export: SUFeedURL=${feed_url}"
+
 # Minimal DMG packaging; refined layout can land with Sparkle app wiring.
 hdiutil create \
   -volname "Focus" \

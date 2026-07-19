@@ -50,22 +50,26 @@ targets:
       - target: FocusCLI
         embed: true
         codeSign: true
+    # Custom Sparkle / Focus keys must live in a real Info.plist — Xcode's
+    # GENERATE_INFOPLIST_FILE INFOPLIST_KEY_* path silently drops unknown keys.
+    info:
+      path: Apps/Focus/FocusMac/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: Focus
+        LSUIElement: true
+        NSHumanReadableCopyright: "Copyright © 2026 Maciek Sitkowski"
+        SUFeedURL: https://github.com/sitek94/focus/releases/latest/download/appcast.xml
+        SUPublicEDKey: E7Hid1AujVqM3Qg6ikmwPwSbBethJ/YdbTw7NVg1cHQ=
+        SUEnableAutomaticChecks: true
+        SUAutomaticallyUpdate: true
+        SUScheduledCheckInterval: 3600
+        FocusGitCommit: $(FOCUS_GIT_COMMIT)
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.macieksitkowski.focus.macos
         PRODUCT_NAME: Focus
         PRODUCT_MODULE_NAME: FocusMac
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_CFBundleDisplayName: Focus
-        INFOPLIST_KEY_LSUIElement: YES
-        INFOPLIST_KEY_NSHumanReadableCopyright: "Copyright © 2026 Maciek Sitkowski"
-        # Ed25519 public key for Sparkle; private key is SPARKLE_ED25519_PRIVATE_KEY only.
-        INFOPLIST_KEY_SUPublicEDKey: E7Hid1AujVqM3Qg6ikmwPwSbBethJ/YdbTw7NVg1cHQ=
-        INFOPLIST_KEY_SUFeedURL: https://github.com/sitek94/focus/releases/latest/download/appcast.xml
-        INFOPLIST_KEY_SUEnableAutomaticChecks: YES
-        INFOPLIST_KEY_SUAutomaticallyUpdate: YES
-        INFOPLIST_KEY_SUScheduledCheckInterval: 3600
-        INFOPLIST_KEY_FocusGitCommit: "$(FOCUS_GIT_COMMIT)"
         ENABLE_HARDENED_RUNTIME: YES
         COMBINE_HIDPI_IMAGES: YES
         LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/../Frameworks"

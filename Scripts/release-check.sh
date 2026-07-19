@@ -72,22 +72,8 @@ else
   echo "release-check: local tag ${TAG} not present (ok for pre-tag dry runs)"
 fi
 
-placeholder_edkey="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
-if grep -Fq "INFOPLIST_KEY_SUPublicEDKey: ${placeholder_edkey}" project.yml; then
-  echo "error: SUPublicEDKey is still the all-zero placeholder" >&2
-  exit 1
-fi
-if ! grep -Eq 'INFOPLIST_KEY_SUPublicEDKey:[[:space:]]*[A-Za-z0-9+/=]{40,}' project.yml; then
-  echo "error: SUPublicEDKey missing or malformed in project.yml" >&2
-  exit 1
-fi
-echo "release-check: SUPublicEDKey present in project.yml"
-
-if grep -Eq 'INFOPLIST_KEY_SUFeedURL:[[:space:]]*https://' project.yml; then
-  echo "release-check: Sparkle feed URL present in project.yml"
-fi
-
 ./Scripts/assert-hardened-runtime.sh
+./Scripts/assert-sparkle-info-plist.sh
 
 check_secret_name() {
   local name="$1"

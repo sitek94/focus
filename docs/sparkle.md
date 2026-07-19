@@ -17,13 +17,17 @@ keys live in `project.yml`). It is not part of the portable SwiftPM graph.
   and implements `SPUUpdaterDelegate`.
 - Settings menu exposes automatic-check toggle, “Check for Updates…”, and a
   build label (`Focus <marketing> (<build>) · <short commit>`).
-- Info.plist keys (via `project.yml`):
+- Info.plist keys live in `Apps/Focus/FocusMac/Resources/Info.plist` (also
+  declared under `info.properties` in `project.yml`). Do **not** use
+  `INFOPLIST_KEY_SU*` — Xcode’s generated Info.plist path silently drops
+  unknown keys (that shipped builds 5–6 without a feed URL).
   - `SUPublicEDKey` — live Ed25519 public key (private key never in source)
   - `SUFeedURL` — public GitHub Releases `…/latest/download/appcast.xml`
-  - `SUEnableAutomaticChecks` — `YES`
-  - `SUAutomaticallyUpdate` — `YES` (download + install without prompting)
+  - `SUEnableAutomaticChecks` / `SUAutomaticallyUpdate` — automatic silent updates
   - `SUScheduledCheckInterval` — `3600` (one hour)
   - `FocusGitCommit` — `$(FOCUS_GIT_COMMIT)` (`local` locally; SHA in deploy)
+- `make assert-sparkle-info-plist` (in `verify-linux`) and the macOS archive
+  script both fail closed if `SUFeedURL` is missing.
 
 ## Idle relaunch
 
