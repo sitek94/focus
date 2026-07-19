@@ -58,9 +58,9 @@ jobs:
         run: |
           set -euo pipefail
           missing=0
+          # P12 password may be empty (Keychain Access allows export without one).
           for name in \
             APPLE_DEVELOPER_ID_APPLICATION_P12_BASE64 \
-            APPLE_DEVELOPER_ID_APPLICATION_P12_PASSWORD \
             APPLE_NOTARY_API_PRIVATE_KEY \
             SPARKLE_ED25519_PRIVATE_KEY \
             APPLE_TEAM_ID \
@@ -76,6 +76,7 @@ jobs:
             exit 1
           fi
           echo "deploy-macos: required secrets/vars present"
+          echo "deploy-macos: P12 password ${APPLE_DEVELOPER_ID_APPLICATION_P12_PASSWORD:+is set}${APPLE_DEVELOPER_ID_APPLICATION_P12_PASSWORD:-is empty (ok)}"
           echo "deploy-macos: MARKETING_VERSION=${MARKETING_VERSION} BUILD=${CURRENT_PROJECT_VERSION} COMMIT=${FOCUS_GIT_COMMIT}"
 
       - name: Log Apple toolchain / runner image

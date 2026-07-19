@@ -12,11 +12,6 @@ if [[ -z "${APPLE_DEVELOPER_ID_APPLICATION_P12_BASE64:-}" ]]; then
   exit 0
 fi
 
-if [[ -z "${APPLE_DEVELOPER_ID_APPLICATION_P12_PASSWORD:-}" ]]; then
-  echo "error: P12 present but APPLE_DEVELOPER_ID_APPLICATION_P12_PASSWORD unset" >&2
-  exit 1
-fi
-
 if [[ "$(uname -s)" != "Darwin" ]]; then
   echo "error: release-import-signing.sh requires macOS" >&2
   exit 1
@@ -33,9 +28,10 @@ echo "${APPLE_DEVELOPER_ID_APPLICATION_P12_BASE64}" | base64 --decode >"$P12_PAT
 security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
 security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+# Password may be empty — Keychain Access allows exporting a .p12 with no passphrase.
 security import "$P12_PATH" \
   -k "$KEYCHAIN_PATH" \
-  -P "${APPLE_DEVELOPER_ID_APPLICATION_P12_PASSWORD}" \
+  -P "${APPLE_DEVELOPER_ID_APPLICATION_P12_PASSWORD:-}" \
   -T /usr/bin/codesign \
   -T /usr/bin/security \
   -T /usr/bin/productbuild
