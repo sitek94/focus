@@ -32,9 +32,6 @@ swiftLanguageModes: [.v6]   // Swift 6 language mode = strict concurrency + newe
   compile and test fine on Linux.
 - The actual **iOS 26 / macOS 26 SDK builds and simulator/device runs require Xcode 26 on
   a Mac** — only the cross-platform Swift can be exercised here (see limitation below).
-- Being private does not change the Linux toolchain setup, but it does not remove
-  external-license verification, attribution, or provenance requirements.
-
 ### Important limitation (read this first)
 There is **no Xcode, no iOS/macOS Simulator, and no Apple SDKs** on Linux. You **cannot**
 build/run code that imports `UIKit`, `SwiftUI`, `AppKit`, or uses `xcodebuild`/`.xcodeproj`
@@ -50,7 +47,7 @@ runtime proof is authoritative only for:
 
 - the portable `FocusSession`, `FocusPersistence`, `FocusControl`, and `focus` SwiftPM work;
 - Linux SQLite, CLI, and Unix-socket integration tests;
-- docs, license/provenance, dependency, formatting, and static boundary checks;
+- docs, license, dependency, formatting, and static boundary checks;
 - deterministic XcodeGen generation and confirmation that generated projects stay untracked.
 
 A successful Linux XcodeGen run proves generator syntax and determinism only. It does not
@@ -72,33 +69,23 @@ public feed hosting, and TestFlight setup can wait until release-focused work. A
 portions of a PR require working `macos-26` Actions access before they can be accepted.
 
 ### Session bootstrap for external sources
-At the beginning of every session that needs external source inspection, before
-implementation or research:
+When a session needs to inspect an external repository beyond what docs already
+record:
 
-1. Inventory every external repository, skill source, or repo-backed example needed for
-   that session’s work (pins and licenses live in `THIRD_PARTY_NOTICES.md` and the
-   relevant `docs/` page).
-2. Materialize all of those sources under `/workspace/tmp/references/`, one unique
-   directory per repository and pinned full commit SHA, for example
-   `tmp/references/avdlee-swiftui-agent-skill-f06d1437a3fb/`.
-3. Check out the exact SHA in detached state and verify the canonical remote, `HEAD`, clean
-   worktree, license file, and required nested references/directories. Recurse submodules
-   only when the source actually uses them.
-4. Reuse an existing clone only when its remote, exact SHA, and clean state match. Otherwise
-   create a fresh uniquely named clone; never silently inspect a mutable default branch.
-5. Treat reference clones as read-only. Research subagents must not commit or push from
-   them. Copy or materially adapt nothing until the license at that exact SHA is compatible
-   and the notice/header obligation is known.
+1. Inventory the repositories and exact commit SHAs needed for that work.
+2. Materialize them under `/workspace/tmp/references/`, one unique directory per
+   repository and pinned full commit SHA.
+3. Check out the exact SHA in detached state and verify the canonical remote,
+   `HEAD`, and a clean worktree. Recurse submodules only when the source uses them.
+4. Reuse a clone only when remote, SHA, and clean state all match; otherwise create
+   a fresh uniquely named clone. Never silently inspect a mutable default branch.
+5. Treat reference clones as read-only. Research subagents must not commit or push
+   from them.
 
-Clone CodexBar, Justsayit, XcodeGen, Sparkle, or another reference only when the current
-work requires source inspection beyond what is already recorded in docs and notices.
-Normal SwiftPM dependency resolution is not a substitute for a reference clone when source
-or license inspection is required.
-
-`tmp/` is transient and must never be committed. Use explicit-path `git add` commands,
-never `git add .`; before every commit, inspect `git diff --cached --name-only` and reject
-any `tmp/` path. The parent agent owns git commits and pushes; research subagents only
-report findings.
+`tmp/` is transient and must never be committed. Use explicit-path `git add`
+commands, never `git add .`; before every commit, inspect
+`git diff --cached --name-only` and reject any `tmp/` path. The parent agent owns
+git commits and pushes; research subagents only report findings.
 
 ### Common commands (run from a package dir containing `Package.swift`)
 - Build: `swift build`

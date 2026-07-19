@@ -24,7 +24,6 @@ echo "release-check: validating ${TAG} / ${VERSION}"
 required_files=(
   LICENSE
   CHANGELOG.md
-  THIRD_PARTY_NOTICES.md
   project.yml
   Package.swift
   Config/Shared.xcconfig

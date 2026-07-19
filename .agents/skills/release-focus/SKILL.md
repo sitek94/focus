@@ -8,21 +8,11 @@ description: >
 
 # Release Focus
 
-## Provenance
-
-| Field       | Value                                                                                                                |
-| ----------- | -------------------------------------------------------------------------------------------------------------------- |
-| Upstream    | Focus-authored                                                                                                       |
-| License     | N/A (original Focus text)                                                                                            |
-| Disposition | **original**                                                                                                         |
-| Inspiration | CodexBar release workflow _shape_ and official Apple/Sparkle docs — **not** copied text, paths, or vault assumptions |
-
 ## Read first
 
 1. `docs/release-macos.md` — versioning, tag policy, checklist, `make release-check`, CI vs release workflows.
 2. `docs/release-ios.md` — iOS release path (TODO, not yet implemented); why the iOS shell never ships from `release.yml`.
-3. `docs/sparkle.md` — Sparkle 2.9.4 pin, Ed25519 key split, appcast hosting, update smoke expectations.
-4. `THIRD_PARTY_NOTICES.md` — Sparkle notice obligations when shipping.
+3. `docs/sparkle.md` — Sparkle 2.9.4 pin, EdDSA key split, appcast hosting, update smoke expectations.
 
 ## Exact checks
 

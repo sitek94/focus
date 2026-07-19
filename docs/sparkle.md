@@ -26,11 +26,6 @@ Sparkle is linked through XcodeGen/`project.yml` as a remote Swift package on th
     public key before shipping signed updates.
   - `SUEnableAutomaticChecks` — `YES` by default; user preference is Sparkle-owned.
 
-## Pins and notices
-
-Recorded in `THIRD_PARTY_NOTICES.md`, including Sparkle’s bundled-component
-notices from the pinned commit.
-
 ## Keys and feed
 
 - Ed25519 private key stays in release secret `SPARKLE_ED25519_PRIVATE_KEY`;

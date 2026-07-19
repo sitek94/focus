@@ -23,11 +23,13 @@ and this project uses [Semantic Versioning](https://semver.org/).
   `select-xcode` reads it and prefers an already-correct `DEVELOPER_DIR` or
   active `xcode-select` before the `sudo` fallback, so local Apple builds no
   longer require sudo.
+- Removed setup-only `PLAN.md` and `THIRD_PARTY_NOTICES.md`; durable contracts
+  live in `docs/`, `LICENSE`, and agent skills without source-provenance tables.
 
 ### Added
 
-- Foundation repository contracts: MIT license, third-party notices, agent docs,
-  changelog, Makefile, and docs frontmatter tooling.
+- Foundation repository contracts: MIT license, agent docs, changelog, Makefile,
+  and docs frontmatter tooling.
 - Deterministic `FocusSession` reducer with fixed 20m/10s/20s/1m policy and
   Linux manual-clock tests.
 - SQLite `FocusPersistence` actor store (`schema_meta`, `runtime_snapshot`,
@@ -43,4 +45,4 @@ and this project uses [Semantic Versioning](https://semver.org/).
 - GitHub Actions Linux + `macos-26`/Xcode 26.6 CI and secret-gated release
   workflow definitions.
 - Focus-adapted agent skills (`focus-swiftui`, `focus-concurrency`,
-  `focus-testing`, `release-focus`) with provenance checks.
+  `focus-testing`, `release-focus`).

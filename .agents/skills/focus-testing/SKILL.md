@@ -8,17 +8,8 @@ description: >
 
 # Focus Testing
 
-## Provenance
-
-| Field        | Value                                                                                                                          |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| Upstream     | https://github.com/twostraws/Swift-Testing-Agent-Skill                                                                         |
-| Commit       | `2d6bba14a3c8bf3694f218b92fffe617c41ae43e`                                                                                     |
-| License      | MIT                                                                                                                            |
-| Disposition  | **adapted** (not copied)                                                                                                       |
-| Source paths | `swift-testing-pro/skills/swift-testing-pro/SKILL.md`; `references/core-rules.md`; `writing-better-tests.md`; `async-tests.md` |
-
-Materially rewritten to route agents to Focus’s suites and CI boundaries (`docs/testing.md`). Upstream feature-catalog dumps and XCTest migration essays are omitted unless a file still uses XCTest.
+Routes agents to Focus’s suites and CI boundaries (`docs/testing.md`). Prefer
+suite-map guidance over generic testing essays unless a file still uses XCTest.
 
 ## Defaults
 
