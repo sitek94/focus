@@ -1,8 +1,8 @@
 # Focus
 
-Focus is a native macOS menu-bar timer with fixed focus / warning / break /
-snooze cycles, an in-bundle `focus` CLI, and a minimal iOS shell. It is not a
-stats dashboard, blocker, or configurable pomodoro suite.
+Focus is a native macOS menu-bar app skeleton with an in-bundle `focus` CLI, a
+minimal iOS shell, and continuous deploy wiring (Developer ID + Sparkle on
+macOS; internal TestFlight on iOS). Portable libraries build and test on Linux.
 
 ## Requirements
 
@@ -22,8 +22,9 @@ stats dashboard, blocker, or configurable pomodoro suite.
 | `make verify-linux` | Docs, lint, skills, build, portable tests |
 | `make build-macos` / `make build-ios` | Apple builds (macOS host + pinned Xcode) |
 
-See `AGENTS.md` for the full command index and proof boundary. Run
-`make docs-list` before architecture, testing, or release work.
+See [`AGENTS.md`](./AGENTS.md) for the full command index and proof boundary.
+Contributing docs: [`docs/index.md`](./docs/index.md). Run `make docs-list`
+before layout, testing, or release work.
 
 ## Layout
 
@@ -31,7 +32,7 @@ See `AGENTS.md` for the full command index and proof boundary. Run
 - `CLI/FocusCLI` — `focus` executable sources
 - `Apps/Focus/` — macOS / iOS UI shells (Apple frameworks only here)
 - `project.yml` + `tools/projectgen/` — XcodeGen pin; generated project is gitignored
-- `docs/` — architecture, testing, release, and ADRs
+- `docs/` — contributing docs (writing, layout, testing, release, ADRs)
 
 ## License
 

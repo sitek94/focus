@@ -15,12 +15,12 @@ keys live in `project.yml`). It is not part of the portable SwiftPM graph.
 
 - `UpdatePreferencesClient` owns `SPUStandardUpdaterController` on `@MainActor`
   and implements `SPUUpdaterDelegate`.
-- Settings menu exposes automatic-check toggle, “Check for Updates…”, and a
+- Settings menu exposes an automatic-check toggle, “Check for Updates…”, and a
   build label (`Focus <marketing> (<build>) · <short commit>`).
-- Info.plist keys live in `Apps/Focus/FocusMac/Resources/Info.plist` (also
-  declared under `info.properties` in `project.yml`). Do **not** use
+- Sparkle keys live in `Apps/Focus/FocusMac/Resources/Info.plist` (also
+  declared under `info.properties` in `project.yml`). Do not use
   `INFOPLIST_KEY_SU*` — Xcode’s generated Info.plist path silently drops
-  unknown keys (that shipped builds 5–6 without a feed URL).
+  unknown keys.
   - `SUPublicEDKey` — live Ed25519 public key (private key never in source)
   - `SUFeedURL` — public GitHub Releases `…/latest/download/appcast.xml`
   - `SUEnableAutomaticChecks` / `SUAutomaticallyUpdate` — automatic silent updates
@@ -50,3 +50,5 @@ activation when no Sparkle session is in progress.
 
 End-to-end update from an older signed build is credentialed Mac acceptance, not
 a Linux check. Never put a GitHub token in the app.
+
+See [release-macos.md](./release-macos.md) for the publish loop.

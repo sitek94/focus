@@ -1,7 +1,7 @@
 ---
 summary: "Linux-authoritative SwiftPM test lanes, Mac CI integration/smoke targets, and manual limits."
 read_when:
-  - "Adding or naming a test target or acceptance case"
+  - "Adding or naming a test target or suite"
   - "Deciding whether a behavior must pass on Linux"
   - "Writing XCUITest smoke coverage"
 ---
@@ -10,25 +10,35 @@ read_when:
 
 ## Linux-authoritative (SwiftPM)
 
-| Suite | Focus |
+| Suite | Makefile filter |
 |---|---|
-| `FocusSessionTests` | Fixed timing, transitions, pause/resume, reconciliation |
-| `FocusPersistenceIntegrationTests` | SQLite snapshot/event atomicity |
-| `FocusControlTests` | Framing, DTOs, protocol validation |
-| `FocusCLIIntegrationTests` | Real Linux socket fixture + CLI subprocess |
-| `FocusPlatformGatingTests` | Platform seams that must stay portable |
+| `FocusSessionTests` | `make test-session` |
+| `FocusPersistenceIntegrationTests` | `make test-persistence` |
+| `FocusControlTests` | `make test-control` |
+| `FocusCLIIntegrationTests` | `make test-cli` |
+| `FocusPlatformGatingTests` | `make test-platform-gating` |
 
-Run all with `make test-linux`, or focused filters via `make test-session`,
-`test-persistence`, `test-control`, `test-cli`, `test-platform-gating`.
+Run the full portable set with `make test-linux`. Prefer Swift Testing
+(`@Test`, `#expect` / `#require`) for these suites. Inject clocks and clients;
+do not use real `Task.sleep` in portable tests.
 
 ## Mac CI
 
-- `FocusMacIntegrationTests` — Darwin socket, `getpeereid`, adapters.
+- `FocusMacIntegrationTests` — Darwin socket and platform adapters.
 - `FocusMacUITests` / `FocusIOSUITests` — minimal launch smokes only.
-- No screenshot or visual-regression tooling in v1.
+- No screenshot or visual-regression tooling.
+
+A successful compile or launch is not evidence for overlay, accessibility,
+login-item, IPC-security, or Sparkle update behavior. Those need Mac
+integration or manual acceptance.
 
 ## Manual Mac only
 
 Multi-display overlays, Dockless no-flash, login-item enable/revoke, VoiceOver,
 App Translocation CLI install, and signed Sparkle update paths need an
 interactive or credentialed Mac. They are not Linux-provable.
+
+## Related
+
+- [Repository layout](./layout.md) — proof boundary
+- [`.agents/skills/focus-testing/SKILL.md`](../.agents/skills/focus-testing/SKILL.md) — agent router

@@ -13,15 +13,14 @@ Routes agents to Focus’s suites and CI boundaries. Details and commands live i
 
 ## Defaults
 
-- New unit/integration tests: **Swift Testing** (`@Test`, `#expect` / `#require`, structs).
-- UI tests: **XCTest** / XCUITest only (Swift Testing has no UI support).
+- New unit/integration tests: Swift Testing (`@Test`, `#expect` / `#require`, structs).
+- UI tests: XCTest / XCUITest only (Swift Testing has no UI support).
 - Pinned Swift toolchain (`.swift-version`); treat installed toolchain as authoritative.
 - Parallel-safe tests; inject clocks/clients; no real `Task.sleep` in portable suites.
-- Prefer parameterized tests for phase/command matrices without exploding Cartesian products.
 
 ## Hard rules
 
-- No screenshot-golden or visual-regression suites in v1.
+- No screenshot-golden or visual-regression suites.
 - A successful compile or launch is not evidence for overlay, accessibility,
   login-item, IPC-security, or Sparkle update behavior — those need Mac
   integration or manual acceptance.
