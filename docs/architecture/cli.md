@@ -4,6 +4,8 @@ read_when:
   - "Adding or changing a CLI command or output format"
   - "Working on FocusControl framing, sockets, or peer checks"
   - "Implementing Install/Repair Command Line Tool"
+  - "Considering XPC, HTTP loopback, or file-polling control"
+  - "Hardening peer identity beyond same-UID checks"
 ---
 
 # CLI and IPC
@@ -57,7 +59,14 @@ incidental logs; human errors go to stderr.
   8 s.
 - Only the server may unlink a stale same-owner socket after verifying its type.
 - If cryptographic proof of the signed CLI is later required, migrate to signed
-  XPC rather than bolting auth onto the socket (ADR 0002).
+  XPC rather than bolting auth onto the socket.
+
+## Why not other transports
+
+- Loopback HTTP / Network.framework — ports, weak local identity.
+- `CFMessagePort` / distributed notifications — wrong reliability model.
+- Defaults/file polling — races and stale state.
+- XPC as the v1 default — extra Apple-only lifecycle surface before needed.
 
 ## Install
 
