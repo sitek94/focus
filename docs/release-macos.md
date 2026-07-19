@@ -8,6 +8,8 @@ read_when:
 
 # Releasing (macOS)
 
+Audience: contributors changing macOS deploy, signing, or Sparkle publish.
+
 Continuous deployment on path-filtered push to `main`, plus manual
 `workflow_dispatch`. Marketing version stays in `Config/Shared.xcconfig` (and
 the deploy workflow `MARKETING_VERSION` env) until you bump it for a milestone.

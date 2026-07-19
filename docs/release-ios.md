@@ -8,6 +8,8 @@ read_when:
 
 # Releasing (iOS)
 
+Audience: contributors changing iOS deploy or TestFlight wiring.
+
 Continuous deployment on path-filtered push to `main`, plus manual
 `workflow_dispatch`. Internal TestFlight only—no Beta App Review. Marketing
 version stays in `Config/Shared.xcconfig` (and the deploy workflow

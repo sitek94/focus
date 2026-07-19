@@ -8,6 +8,8 @@ read_when:
 
 # Sparkle updates
 
+Audience: contributors wiring or debugging FocusMac auto-update.
+
 Sparkle is a remote package on the `FocusMac` target only (pin and Info.plist
 keys live in `project.yml`). It is not part of the portable SwiftPM graph.
 
@@ -33,9 +35,9 @@ keys live in `project.yml`). It is not part of the portable SwiftPM graph.
 
 Focus is a menu-bar app that rarely quits. When Sparkle schedules a silent
 install-on-quit, `UpdatePreferencesClient` takes control via
-`willInstallUpdateOnQuit` and calls the immediate install handler only when
-the session is not in warning or break. Pending installs retry after phase
-changes and on app activation. A background check also runs on launch and
+`willInstallUpdateOnQuit` and calls the immediate install handler only when no
+warning or break UI is active. Pending installs retry after those UI states
+clear and on app activation. A background check also runs on launch and
 activation when no Sparkle session is in progress.
 
 ## Keys and feed

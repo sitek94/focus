@@ -7,6 +7,8 @@ read_when:
 
 # Docs index
 
+Audience: contributors orienting to the docs tree.
+
 Contributing documentation for this repository.
 
 Start with [writing documentation](./writing-documentation.md) when you edit

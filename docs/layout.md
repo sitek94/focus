@@ -8,6 +8,8 @@ read_when:
 
 # Repository layout
 
+Audience: contributors placing code or renaming targets.
+
 Focus is a monorepo with a portable SwiftPM core and an XcodeGen-generated
 Apple project. This page covers directories, identifiers, and the Linux vs
 Apple proof boundary.

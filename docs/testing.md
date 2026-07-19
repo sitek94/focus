@@ -8,6 +8,11 @@ read_when:
 
 # Testing
 
+Audience: contributors adding or reviewing tests.
+
+Scope: which suites run where, and what Linux cannot prove. Non-scope: product
+acceptance criteria for placeholder features.
+
 ## Linux-authoritative (SwiftPM)
 
 | Suite | Makefile filter |
@@ -40,5 +45,6 @@ interactive or credentialed Mac. They are not Linux-provable.
 
 ## Related
 
-- [Repository layout](./layout.md) — proof boundary
-- [`.agents/skills/focus-testing/SKILL.md`](../.agents/skills/focus-testing/SKILL.md) — agent router
+- [Repository layout](./layout.md)
+- [`AGENTS.md`](../AGENTS.md) — proof boundary and command index
+- [`.agents/skills/focus-testing/SKILL.md`](../.agents/skills/focus-testing/SKILL.md)
