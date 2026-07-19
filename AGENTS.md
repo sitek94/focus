@@ -21,7 +21,7 @@ Keep commands here and in the `Makefile`; put detailed rationale in the owning
 | `make test-macos-integration` / `smoke-macos` / `smoke-ios` / `archive-macos` | Apple CI targets (macOS only; `ARCHIVE_MODE=ci` for unsigned gate) |
 | `make verify-linux` | Toolchain assert, docs, lint, build, portable tests |
 | `make verify-apple` | Xcode select, generate, both builds, integration, smokes, archive |
-| `make release-check VERSION=x.y.z` | Tag/changelog/version/key presence checks (no publish) |
+| `make release-check VERSION=x.y.z` | Tag/version/key presence checks (no publish) |
 
 Underlying pins:
 

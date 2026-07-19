@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Validate tag/changelog/version consistency without publishing.
+# Validate tag/version consistency without publishing.
 # Usage: Scripts/release-check.sh 0.1.0
 # Optional: FOCUS_REQUIRE_RELEASE_SECRETS=1 to require signing/notary/Sparkle secrets.
 set -euo pipefail
@@ -23,7 +23,6 @@ echo "release-check: validating ${TAG} / ${VERSION}"
 
 required_files=(
   LICENSE
-  CHANGELOG.md
   project.yml
   Package.swift
   Config/Shared.xcconfig
@@ -37,11 +36,6 @@ for path in "${required_files[@]}"; do
     exit 1
   fi
 done
-
-if ! grep -Eq "^## \[${VERSION}\]" CHANGELOG.md; then
-  echo "error: CHANGELOG.md lacks an explicit '## [${VERSION}]' section" >&2
-  exit 1
-fi
 
 marketing_yml="$(
   awk -F'"' '/MARKETING_VERSION:/ { print $2; exit }' project.yml

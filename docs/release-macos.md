@@ -14,8 +14,8 @@ repository secrets.
 
 ## Checklist
 
-1. Changelog section and `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` agree
-   with the tag (`Config/Shared.xcconfig` and `project.yml`).
+1. `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` agree with the tag
+   (`Config/Shared.xcconfig` and `project.yml`).
 2. `make release-check VERSION=x.y.z` passes (no publish).
 3. Push the signed tag, then run `.github/workflows/release.yml`
    (`workflow_dispatch` with required `tag` input). The workflow:
@@ -26,8 +26,8 @@ repository secrets.
    - imports Developer ID / archives / notarizes / generates Sparkle appcast
      only when the corresponding secrets/vars are present; otherwise those
      steps skip with an explicit log line
-   - creates a **draft** GitHub Release (DMG first, then `appcast.xml`) when a
-     signed DMG was produced
+   - creates a **draft** GitHub Release with generated notes (DMG first, then
+     `appcast.xml`) when a signed DMG was produced
 4. Clean-Mac install/update smoke, then publish the draft.
 5. Never release the iOS shell from this workflow (workflow guard forbids
    iOS/`ipa` artifacts). See `docs/release-ios.md`.
