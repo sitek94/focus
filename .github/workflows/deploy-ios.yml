@@ -1,0 +1,89 @@
+# Continuous iOS deploy: push to main → archive → TestFlight internal.
+# Keep shared path filters in sync with deploy-macos.yml (Sources/, Config/, …).
+name: Deploy iOS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Apps/Focus/FocusIOS/**"
+      - "Sources/**"
+      - "Package.swift"
+      - "Package.resolved"
+      - "project.yml"
+      - "Config/**"
+      - "tools/projectgen/**"
+      - ".xcode-version"
+      - ".github/workflows/deploy-ios.yml"
+      - "Scripts/release-ios-archive-upload.sh"
+      - "Scripts/select-xcode.sh"
+      - "Scripts/log-apple-toolchain.sh"
+      - "Scripts/assert-generated-project.sh"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-ios
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  MARKETING_VERSION: "0.1.0"
+
+jobs:
+  deploy-ios:
+    name: deploy-ios
+    runs-on: macos-26
+    timeout-minutes: 180
+    env:
+      APPLE_NOTARY_API_PRIVATE_KEY: ${{ secrets.APPLE_NOTARY_API_PRIVATE_KEY }}
+      APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+      APPLE_NOTARY_API_KEY_ID: ${{ vars.APPLE_NOTARY_API_KEY_ID }}
+      APPLE_NOTARY_API_ISSUER_ID: ${{ vars.APPLE_NOTARY_API_ISSUER_ID }}
+      FOCUS_GIT_COMMIT: ${{ github.sha }}
+      CURRENT_PROJECT_VERSION: ${{ github.run_number }}
+    steps:
+      - name: Checkout
+        # actions/checkout v7.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Require deploy secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in \
+            APPLE_NOTARY_API_PRIVATE_KEY \
+            APPLE_TEAM_ID \
+            APPLE_NOTARY_API_KEY_ID \
+            APPLE_NOTARY_API_ISSUER_ID
+          do
+            if [[ -z "${!name:-}" ]]; then
+              echo "error: missing required deploy secret/var: ${name}" >&2
+              missing=1
+            fi
+          done
+          if [[ "$missing" -ne 0 ]]; then
+            exit 1
+          fi
+          echo "deploy-ios: required secrets/vars present"
+          echo "deploy-ios: MARKETING_VERSION=${MARKETING_VERSION} BUILD=${CURRENT_PROJECT_VERSION} COMMIT=${FOCUS_GIT_COMMIT}"
+
+      - name: Log Apple toolchain / runner image
+        run: ./Scripts/log-apple-toolchain.sh
+
+      - name: Select pinned Xcode
+        run: ./Scripts/select-xcode.sh
+
+      - name: Log Apple toolchain after select
+        run: ./Scripts/log-apple-toolchain.sh
+
+      - name: Regenerate Focus.xcodeproj
+        run: |
+          set -euo pipefail
+          make generate-project
+          make assert-generated-project
+
+      - name: Archive and upload to TestFlight
+        run: ./Scripts/release-ios-archive-upload.sh "${MARKETING_VERSION}" "${CURRENT_PROJECT_VERSION}"
