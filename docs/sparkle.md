@@ -15,8 +15,8 @@ keys live in `project.yml`). It is not part of the portable SwiftPM graph.
 
 - `UpdatePreferencesClient` owns `SPUStandardUpdaterController` on `@MainActor`.
 - Settings menu exposes automatic-check toggle + “Check for Updates…”.
-- Replace the placeholder `SUPublicEDKey` in `project.yml` before shipping
-  signed updates. Private key never belongs in source.
+- `SUPublicEDKey` in `project.yml` is the live public key. Private key never
+  belongs in source.
 
 ## Keys and feed
 
@@ -25,8 +25,8 @@ keys live in `project.yml`). It is not part of the portable SwiftPM graph.
 - `appcast.xml` is a release artifact (gitignored), not hand-edited source.
 - Feed URL must stay publicly readable (currently GitHub Releases
   `…/latest/download/appcast.xml`; see `SUFeedURL` in `project.yml`).
-- `generate_appcast` runs in `release.yml` only when the private key secret is
-  present; otherwise the step skips with a clear log.
+- `generate_appcast` runs in `deploy-macos.yml` after
+  `Scripts/ci-install-sparkle-tools.sh` installs the pinned Sparkle tools.
 
 ## Smoke
 

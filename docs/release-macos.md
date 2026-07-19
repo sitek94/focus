@@ -1,46 +1,38 @@
 ---
-summary: "Versioning, tagging, archive/sign/notarize checklist, and release prerequisites for Focus on macOS."
+summary: "Continuous macOS deploy: Developer ID, notarize, Sparkle from push to main."
 read_when:
-  - "Preparing a version bump or Git tag"
-  - "Changing archive, notarization, or release workflow steps"
-  - "Running make release-check"
+  - "Changing archive, notarization, or deploy workflow steps"
+  - "Wiring macOS signing secrets or Sparkle keys"
+  - "Debugging a failed Deploy macOS run"
 ---
 
 # Releasing (macOS)
 
-Tags are `vX.Y.Z`, signed locally by the owner, pushed before the release
-workflow runs. No tag-signing private key belongs in repository secrets.
-Marketing/build versions live in `Config/Shared.xcconfig` and `project.yml`.
+Continuous deployment on push to `main` (path-scoped). No signed tags, no
+changelog ceremony. Marketing version stays in `Config/Shared.xcconfig`
+(`0.1.0` until a manual milestone bump). Build number is the GitHub Actions
+run number.
 
-## Checklist
+## Loop
 
-1. `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` agree with the tag
-   (`Config/Shared.xcconfig` and `project.yml`).
-2. `make release-check VERSION=x.y.z` passes (no publish).
-3. Push the signed tag, then run `.github/workflows/release.yml`
-   (`workflow_dispatch` with required `tag` input). The workflow:
-   - checks out the tag and runs the signed-tag policy placeholder
-     (`Scripts/verify-signed-tag.sh`; real verification when
-     `Config/git-allowed-signers` exists)
-   - selects the pinned Xcode (`.xcode-version`), regenerates `Focus.xcodeproj`
-   - imports Developer ID / archives / notarizes / generates Sparkle appcast
-     only when the corresponding secrets/vars are present; otherwise those
-     steps skip with an explicit log line
-   - creates a **draft** GitHub Release with generated notes (DMG first, then
-     `appcast.xml`) when a signed DMG was produced
-4. Clean-Mac install/update smoke, then publish the draft.
-5. Never release the iOS shell from this workflow (workflow guard forbids
-   iOS/`ipa` artifacts). See `docs/release-ios.md`.
+1. Commit + push to `main` (paths under FocusMac / shared Sources / Config / …).
+2. `.github/workflows/deploy-macos.yml` runs:
+   - selects pinned Xcode (`.xcode-version`), regenerates `Focus.xcodeproj`
+   - imports Developer ID, archives, notarizes, generates Sparkle `appcast.xml`
+   - publishes a GitHub Release `macos-build-<run_number>` with `--generate-notes`
+     (DMG + `appcast.xml`) and marks it `--latest`
+3. Installed apps pick up the update via Sparkle (see `docs/sparkle.md`).
+4. Never ship iOS artifacts from this workflow (guarded). See `docs/release-ios.md`.
 
-## CI vs release
+Manual force: Actions → **Deploy macOS** → **Run workflow**.
+
+## CI vs deploy
 
 | Surface | Workflow | Signing / secrets |
 |---|---|---|
-| PR / `main` | `.github/workflows/ci.yml` | `contents: read` only; unsigned archive gate; no release secrets |
-| Cut a version | `.github/workflows/release.yml` | Secrets optional until real release; skipped when absent |
-
-Ordinary CI never signs, notarizes, creates tags, publishes releases, or
-modifies `appcast.xml` on merge.
+| Push / PR health | `.github/workflows/ci.yml` | `contents: read`; unsigned archive gate; no release secrets |
+| Continuous deploy | `.github/workflows/deploy-macos.yml` | Requires signing + notary + Sparkle secrets; fails closed if missing |
+| Legacy tag cut | `.github/workflows/release.yml` | Optional secrets; skipped when absent — delete in Phase 4 |
 
 ## Prerequisites
 
@@ -55,6 +47,5 @@ Repository configuration (never put secret values in source):
 Do not create both a secret and a variable for the same identifier. The workflow
 uses its scoped built-in `GITHUB_TOKEN`; no personal access token is required.
 
-Supporting scripts: `Scripts/release-*.sh`, `Scripts/verify-signed-tag.sh`,
-`Scripts/archive-macos-ci.sh`. Sparkle keys and feed hosting:
-`docs/sparkle.md`.
+Supporting scripts: `Scripts/release-*.sh`, `Scripts/ci-install-sparkle-tools.sh`,
+`Scripts/archive-macos-ci.sh`. Sparkle keys and feed hosting: `docs/sparkle.md`.

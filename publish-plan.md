@@ -59,27 +59,18 @@ included).
 
 Credentials (one-time):
 
-- [ ] **OWNER**: create ASC API key (Users and Access → Integrations; role:
-      Admin so the same key can mint certificates), download `.p8`, hand the
-      agent the file path + Key ID + Issuer ID.
+- [ ] **OWNER**: create ASC API key named `Focus CI` (blocked while Apple
+      Developer Program renewal processes). Role: Admin. Hand agent `.p8`
+      path + Key ID + Issuer ID.
 - [ ] Agent: `gh secret set APPLE_NOTARY_API_PRIVATE_KEY < key.p8`;
       `gh variable set` for `APPLE_NOTARY_API_KEY_ID`,
-      `APPLE_NOTARY_API_ISSUER_ID`, `APPLE_TEAM_ID` (team ID read via ASC API).
-      Never print key material (release-focus skill rule).
-- [ ] Agent: Developer ID Application identity —
-      - if `security find-identity -v -p codesigning` shows one locally,
-        export `.p12` via `security export` (**OWNER**: one Keychain "Allow"
-        click);
-      - else generate a private key + CSR (openssl) and create the cert via
-        ASC API `POST /v1/certificates` (type `DEVELOPER_ID_APPLICATION`);
-        fallback if the API refuses (role restrictions): **OWNER** uploads the
-        agent-generated CSR at developer.apple.com and downloads the `.cer`
-        back — no Keychain surgery either way;
-      - assemble `.p12`, `gh secret set` both P12 secrets, shred local files.
-- [ ] Agent: download pinned Sparkle tools, run `generate_keys`, export the
-      private key (`generate_keys -x`), `gh secret set
-      SPARKLE_ED25519_PRIVATE_KEY`, shred the export; keep the public key for
-      Phase 2.
+      `APPLE_NOTARY_API_ISSUER_ID`. Never print key material.
+- [x] Agent: `APPLE_TEAM_ID=8N24XF84J5` set as repo variable.
+- [ ] **OWNER**: export Developer ID Application `.p12` via Keychain Access
+      (CLI export failed without interactive keychain unlock); give agent
+      path + password → agent uploads secrets and shreds local copies.
+- [x] Agent: Sparkle keys generated (`--account focus`), private key in
+      `SPARKLE_ED25519_PRIVATE_KEY`, public key in `project.yml`.
 
 Commit 1 on `main` (`deploy-macos.yml` + prerequisites):
 

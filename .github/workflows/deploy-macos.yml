@@ -1,0 +1,158 @@
+# Continuous macOS deploy: push to main → Developer ID → notarize → Sparkle.
+# Keep path filters in sync with deploy-ios.yml shared rows (Sources/, Config/, …).
+name: Deploy macOS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Apps/Focus/FocusMac/**"
+      - "CLI/**"
+      - "Sources/**"
+      - "Package.swift"
+      - "Package.resolved"
+      - "project.yml"
+      - "Config/**"
+      - "tools/projectgen/**"
+      - ".xcode-version"
+      - ".github/workflows/deploy-macos.yml"
+      - "Scripts/release-*.sh"
+      - "Scripts/ci-install-sparkle-tools.sh"
+      - "Scripts/select-xcode.sh"
+      - "Scripts/log-apple-toolchain.sh"
+      - "Scripts/assert-generated-project.sh"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-macos
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+env:
+  MARKETING_VERSION: "0.1.0"
+
+jobs:
+  deploy-macos:
+    name: deploy-macos
+    runs-on: macos-26
+    timeout-minutes: 180
+    env:
+      APPLE_DEVELOPER_ID_APPLICATION_P12_BASE64: ${{ secrets.APPLE_DEVELOPER_ID_APPLICATION_P12_BASE64 }}
+      APPLE_DEVELOPER_ID_APPLICATION_P12_PASSWORD: ${{ secrets.APPLE_DEVELOPER_ID_APPLICATION_P12_PASSWORD }}
+      APPLE_NOTARY_API_PRIVATE_KEY: ${{ secrets.APPLE_NOTARY_API_PRIVATE_KEY }}
+      SPARKLE_ED25519_PRIVATE_KEY: ${{ secrets.SPARKLE_ED25519_PRIVATE_KEY }}
+      APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+      APPLE_NOTARY_API_KEY_ID: ${{ vars.APPLE_NOTARY_API_KEY_ID }}
+      APPLE_NOTARY_API_ISSUER_ID: ${{ vars.APPLE_NOTARY_API_ISSUER_ID }}
+      FOCUS_GIT_COMMIT: ${{ github.sha }}
+      CURRENT_PROJECT_VERSION: ${{ github.run_number }}
+    steps:
+      - name: Checkout
+        # actions/checkout v7.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Require deploy secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in \
+            APPLE_DEVELOPER_ID_APPLICATION_P12_BASE64 \
+            APPLE_DEVELOPER_ID_APPLICATION_P12_PASSWORD \
+            APPLE_NOTARY_API_PRIVATE_KEY \
+            SPARKLE_ED25519_PRIVATE_KEY \
+            APPLE_TEAM_ID \
+            APPLE_NOTARY_API_KEY_ID \
+            APPLE_NOTARY_API_ISSUER_ID
+          do
+            if [[ -z "${!name:-}" ]]; then
+              echo "error: missing required deploy secret/var: ${name}" >&2
+              missing=1
+            fi
+          done
+          if [[ "$missing" -ne 0 ]]; then
+            exit 1
+          fi
+          echo "deploy-macos: required secrets/vars present"
+          echo "deploy-macos: MARKETING_VERSION=${MARKETING_VERSION} BUILD=${CURRENT_PROJECT_VERSION} COMMIT=${FOCUS_GIT_COMMIT}"
+
+      - name: Log Apple toolchain / runner image
+        run: ./Scripts/log-apple-toolchain.sh
+
+      - name: Select pinned Xcode
+        run: ./Scripts/select-xcode.sh
+
+      - name: Log Apple toolchain after select
+        run: ./Scripts/log-apple-toolchain.sh
+
+      - name: Regenerate Focus.xcodeproj
+        run: |
+          set -euo pipefail
+          make generate-project
+          make assert-generated-project
+
+      - name: Import Developer ID certificate
+        run: ./Scripts/release-import-signing.sh
+
+      - name: Archive / export / package DMG
+        run: ./Scripts/release-archive-export.sh "${MARKETING_VERSION}" "${CURRENT_PROJECT_VERSION}"
+
+      - name: Fail if DMG was not produced
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${FOCUS_RELEASE_DMG:-}" || ! -f "${FOCUS_RELEASE_DMG}" ]]; then
+            echo "error: expected signed DMG at FOCUS_RELEASE_DMG" >&2
+            exit 1
+          fi
+
+      - name: Notarize and staple DMG
+        run: ./Scripts/release-notarize.sh "${FOCUS_RELEASE_DMG}"
+
+      - name: Install Sparkle tools
+        run: ./Scripts/ci-install-sparkle-tools.sh
+
+      - name: Generate Sparkle appcast
+        run: |
+          set -euo pipefail
+          artifact_dir="$(dirname "${FOCUS_RELEASE_DMG}")"
+          ./Scripts/release-generate-appcast.sh "$artifact_dir"
+          test -f "${artifact_dir}/appcast.xml"
+
+      - name: Assert release artifacts exclude iOS
+        shell: bash
+        run: |
+          set -euo pipefail
+          if compgen -G 'build/release/**/*iOS*' >/dev/null 2>&1; then
+            echo "error: iOS artifacts must not appear under build/release" >&2
+            find build/release -iname '*ios*' -print >&2 || true
+            exit 1
+          fi
+          if compgen -G 'build/release/**/*.ipa' >/dev/null 2>&1; then
+            echo "error: .ipa must never be a Focus release artifact" >&2
+            exit 1
+          fi
+          echo "deploy-macos: iOS exclusion check ok"
+
+      - name: Publish GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="macos-build-${CURRENT_PROJECT_VERSION}"
+          title="Focus ${MARKETING_VERSION} (build ${CURRENT_PROJECT_VERSION})"
+          assets=("${FOCUS_RELEASE_DMG}" "build/release/appcast.xml")
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "error: release ${tag} already exists; bump via a new push/run" >&2
+            exit 1
+          fi
+          gh release create "$tag" \
+            --latest \
+            --title "$title" \
+            --generate-notes \
+            --target "${GITHUB_SHA}" \
+            "${assets[@]}"
+          echo "deploy-macos: published ${tag}"

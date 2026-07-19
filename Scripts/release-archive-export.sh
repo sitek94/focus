@@ -2,14 +2,19 @@
 # Archive/export arm64 Focus.app for release when signing is available.
 # Without signing secrets, performs the same unsigned structural archive as CI
 # and skips DMG/export (documented skip — not a silent success for publishing).
+#
+# Usage: Scripts/release-archive-export.sh <marketing-version> [build-number]
+# Environment overrides applied to xcodebuild when set:
+#   CURRENT_PROJECT_VERSION, MARKETING_VERSION, FOCUS_GIT_COMMIT
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-VERSION="${1:-}"
-if [[ -z "$VERSION" ]]; then
-  echo "usage: Scripts/release-archive-export.sh <X.Y.Z>" >&2
+MARKETING_VERSION="${1:-}"
+BUILD_NUMBER="${2:-${CURRENT_PROJECT_VERSION:-}}"
+if [[ -z "$MARKETING_VERSION" ]]; then
+  echo "usage: Scripts/release-archive-export.sh <X.Y.Z> [build-number]" >&2
   exit 1
 fi
 
@@ -18,10 +23,20 @@ if [[ "$(uname -s)" != "Darwin" ]]; then
   exit 1
 fi
 
+if [[ -z "$BUILD_NUMBER" ]]; then
+  BUILD_NUMBER="$(
+    awk -F' *= *' '/^CURRENT_PROJECT_VERSION/ { print $2; exit }' Config/Shared.xcconfig
+  )"
+fi
+if [[ -z "$BUILD_NUMBER" ]]; then
+  echo "error: build number missing (pass arg 2 or set CURRENT_PROJECT_VERSION)" >&2
+  exit 1
+fi
+
 mkdir -p build/release
 ARCHIVE_PATH="build/release/Focus.xcarchive"
 EXPORT_DIR="build/release/export"
-DMG_PATH="build/release/Focus-${VERSION}-macos-arm64.dmg"
+DMG_PATH="build/release/Focus-${MARKETING_VERSION}.${BUILD_NUMBER}-macos-arm64.dmg"
 
 rm -rf "$ARCHIVE_PATH" "$EXPORT_DIR" "$DMG_PATH"
 
@@ -50,12 +65,19 @@ fi
 EXPORT_PLIST="build/release/ExportOptions.plist"
 sed "s/\$(APPLE_TEAM_ID)/${APPLE_TEAM_ID}/g" Config/ExportOptions.plist >"$EXPORT_PLIST"
 
-xcodebuild \
-  -project Focus.xcodeproj \
-  -scheme FocusMac \
-  -destination "generic/platform=macOS" \
-  -archivePath "$ARCHIVE_PATH" \
-  archive
+xcodebuild_args=(
+  -project Focus.xcodeproj
+  -scheme FocusMac
+  -destination "generic/platform=macOS"
+  -archivePath "$ARCHIVE_PATH"
+  MARKETING_VERSION="${MARKETING_VERSION}"
+  CURRENT_PROJECT_VERSION="${BUILD_NUMBER}"
+)
+if [[ -n "${FOCUS_GIT_COMMIT:-}" ]]; then
+  xcodebuild_args+=("FOCUS_GIT_COMMIT=${FOCUS_GIT_COMMIT}")
+fi
+
+xcodebuild "${xcodebuild_args[@]}" archive
 
 xcodebuild \
   -exportArchive \

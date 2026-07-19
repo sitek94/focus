@@ -37,12 +37,7 @@ for path in "${required_files[@]}"; do
   fi
 done
 
-marketing_yml="$(
-  awk -F'"' '/MARKETING_VERSION:/ { print $2; exit }' project.yml
-)"
-build_yml="$(
-  awk -F'"' '/CURRENT_PROJECT_VERSION:/ { print $2; exit }' project.yml
-)"
+# Single source of truth for marketing/build versions.
 marketing_xcconfig="$(
   awk -F' *= *' '/^MARKETING_VERSION/ { print $2; exit }' Config/Shared.xcconfig
 )"
@@ -50,20 +45,17 @@ build_xcconfig="$(
   awk -F' *= *' '/^CURRENT_PROJECT_VERSION/ { print $2; exit }' Config/Shared.xcconfig
 )"
 
-if [[ "$marketing_yml" != "$VERSION" ]]; then
-  echo "error: project.yml MARKETING_VERSION='${marketing_yml}' != '${VERSION}'" >&2
+if grep -Eq '^[[:space:]]*MARKETING_VERSION:' project.yml \
+  || grep -Eq '^[[:space:]]*CURRENT_PROJECT_VERSION:' project.yml; then
+  echo "error: version keys must live only in Config/Shared.xcconfig (not project.yml)" >&2
   exit 1
 fi
 if [[ "$marketing_xcconfig" != "$VERSION" ]]; then
   echo "error: Config/Shared.xcconfig MARKETING_VERSION='${marketing_xcconfig}' != '${VERSION}'" >&2
   exit 1
 fi
-if [[ -z "$build_yml" || -z "$build_xcconfig" ]]; then
-  echo "error: CURRENT_PROJECT_VERSION missing from project.yml or Shared.xcconfig" >&2
-  exit 1
-fi
-if [[ "$build_yml" != "$build_xcconfig" ]]; then
-  echo "error: CURRENT_PROJECT_VERSION mismatch (yml=${build_yml}, xcconfig=${build_xcconfig})" >&2
+if [[ -z "$build_xcconfig" ]]; then
+  echo "error: CURRENT_PROJECT_VERSION missing from Config/Shared.xcconfig" >&2
   exit 1
 fi
 if ! [[ "$build_xcconfig" =~ ^[0-9]+$ ]]; then
@@ -80,18 +72,16 @@ else
   echo "release-check: local tag ${TAG} not present (ok for pre-tag dry runs)"
 fi
 
-# Public feed / Sparkle configuration presence (values may still be placeholders).
 placeholder_edkey="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
-if grep -Fq "SUPublicEDKey: ${placeholder_edkey}" project.yml \
-  || grep -Fq "INFOPLIST_KEY_SUPublicEDKey: ${placeholder_edkey}" project.yml; then
-  if [[ "${FOCUS_REQUIRE_RELEASE_SECRETS:-0}" == "1" ]]; then
-    echo "error: SUPublicEDKey is still the all-zero placeholder; replace before a real release" >&2
-    exit 1
-  fi
-  echo "release-check: note: SUPublicEDKey is still the all-zero placeholder (ok until release prep)"
-elif ! grep -RFq "SUPublicEDKey" Apps Config project.yml 2>/dev/null; then
-  echo "release-check: note: SUPublicEDKey not wired into app sources yet"
+if grep -Fq "INFOPLIST_KEY_SUPublicEDKey: ${placeholder_edkey}" project.yml; then
+  echo "error: SUPublicEDKey is still the all-zero placeholder" >&2
+  exit 1
 fi
+if ! grep -Eq 'INFOPLIST_KEY_SUPublicEDKey:[[:space:]]*[A-Za-z0-9+/=]{40,}' project.yml; then
+  echo "error: SUPublicEDKey missing or malformed in project.yml" >&2
+  exit 1
+fi
+echo "release-check: SUPublicEDKey present in project.yml"
 
 if grep -Eq 'INFOPLIST_KEY_SUFeedURL:[[:space:]]*https://' project.yml; then
   echo "release-check: Sparkle feed URL present in project.yml"
