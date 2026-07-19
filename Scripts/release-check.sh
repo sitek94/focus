@@ -87,6 +87,8 @@ if grep -Eq 'INFOPLIST_KEY_SUFeedURL:[[:space:]]*https://' project.yml; then
   echo "release-check: Sparkle feed URL present in project.yml"
 fi
 
+./Scripts/assert-hardened-runtime.sh
+
 check_secret_name() {
   local name="$1"
   if [[ -n "${!name:-}" ]]; then

@@ -114,6 +114,8 @@ targets:
         PRODUCT_MODULE_NAME: FocusCLI
         GENERATE_INFOPLIST_FILE: YES
         SKIP_INSTALL: YES
+        # Required for notarization of the CLI embedded inside Focus.app.
+        ENABLE_HARDENED_RUNTIME: YES
         LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/../Frameworks"
 
   FocusMacIntegrationTests:
