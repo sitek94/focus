@@ -37,6 +37,10 @@ struct SettingsMenuSection: View {
 
   @ViewBuilder
   private var updateControls: some View {
+    Text(BuildInfo.menuLabel)
+      .foregroundStyle(.secondary)
+      .accessibilityLabel(BuildInfo.menuLabel)
+
     Toggle(
       "Check for Updates Automatically",
       isOn: Binding(

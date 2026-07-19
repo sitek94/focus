@@ -52,6 +52,10 @@ final class FocusRuntimeOwner {
     self.updatePreferences = updatePreferences
     self.cliInstaller = cliInstaller
 
+    self.updatePreferences.isSafeToInstallUpdate = { [weak self] in
+      self?.isSafeToInstallUpdate ?? true
+    }
+
     self.overlayCoordinator.onUserSkip = { [weak self] in
       await self?.send(.skip(source: .warning))
     }
@@ -157,9 +161,21 @@ final class FocusRuntimeOwner {
         }
         await applyPresentation(directive)
         rescheduleWake()
+        updatePreferences.tryInstallPendingUpdateIfSafe()
       }
     }
     return result.response
+  }
+
+  /// True when Sparkle may install+relaunch without interrupting warning/break UI.
+  var isSafeToInstallUpdate: Bool {
+    guard let runtime else { return true }
+    switch runtime.phase {
+    case .warning, .breakTime:
+      return false
+    case .focus, .paused:
+      return true
+    }
   }
 
   /// Readable phase label for the menu.
@@ -257,6 +273,7 @@ final class FocusRuntimeOwner {
     lastCommandResult = reduction.commandResult
     await applyPresentation(reduction.presentation)
     rescheduleWake()
+    updatePreferences.tryInstallPendingUpdateIfSafe()
   }
 
   private func applyPresentation(_ directive: PresentationDirective) async {

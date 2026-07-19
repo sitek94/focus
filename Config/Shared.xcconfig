@@ -3,6 +3,8 @@
 PRODUCT_NAME = Focus
 MARKETING_VERSION = 0.1.0
 CURRENT_PROJECT_VERSION = 1
+// Overridden by deploy-macos with the git SHA; local/ad-hoc builds stay "local".
+FOCUS_GIT_COMMIT = local
 SWIFT_VERSION = 6.0
 SWIFT_STRICT_CONCURRENCY = complete
 ENABLE_USER_SCRIPT_SANDBOXING = YES

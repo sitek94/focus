@@ -63,6 +63,9 @@ targets:
         INFOPLIST_KEY_SUPublicEDKey: E7Hid1AujVqM3Qg6ikmwPwSbBethJ/YdbTw7NVg1cHQ=
         INFOPLIST_KEY_SUFeedURL: https://github.com/sitek94/focus/releases/latest/download/appcast.xml
         INFOPLIST_KEY_SUEnableAutomaticChecks: YES
+        INFOPLIST_KEY_SUAutomaticallyUpdate: YES
+        INFOPLIST_KEY_SUScheduledCheckInterval: 3600
+        INFOPLIST_KEY_FocusGitCommit: "$(FOCUS_GIT_COMMIT)"
         ENABLE_HARDENED_RUNTIME: YES
         COMBINE_HIDPI_IMAGES: YES
         LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/../Frameworks"

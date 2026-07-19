@@ -1,5 +1,5 @@
 ---
-summary: "Sparkle key handling, appcast generation, feed hosting, and update smoke expectations."
+summary: "Sparkle key handling, silent auto-update, idle relaunch, and feed hosting."
 read_when:
   - "Wiring Sparkle into FocusMac"
   - "Generating or hosting appcast.xml"
@@ -13,18 +13,32 @@ keys live in `project.yml`). It is not part of the portable SwiftPM graph.
 
 ## Wiring
 
-- `UpdatePreferencesClient` owns `SPUStandardUpdaterController` on `@MainActor`.
-- Settings menu exposes automatic-check toggle + “Check for Updates…”.
-- `SUPublicEDKey` in `project.yml` is the live public key. Private key never
-  belongs in source.
+- `UpdatePreferencesClient` owns `SPUStandardUpdaterController` on `@MainActor`
+  and implements `SPUUpdaterDelegate`.
+- Settings menu exposes automatic-check toggle, “Check for Updates…”, and a
+  build label (`Focus <marketing> (<build>) · <short commit>`).
+- Info.plist keys (via `project.yml`):
+  - `SUPublicEDKey` — live Ed25519 public key (private key never in source)
+  - `SUFeedURL` — public GitHub Releases `…/latest/download/appcast.xml`
+  - `SUEnableAutomaticChecks` — `YES`
+  - `SUAutomaticallyUpdate` — `YES` (download + install without prompting)
+  - `SUScheduledCheckInterval` — `3600` (one hour)
+  - `FocusGitCommit` — `$(FOCUS_GIT_COMMIT)` (`local` locally; SHA in deploy)
+
+## Idle relaunch
+
+Focus is a menu-bar app that rarely quits. When Sparkle schedules a silent
+install-on-quit, `UpdatePreferencesClient` takes control via
+`willInstallUpdateOnQuit` and calls the immediate install handler only when
+the session is not in warning or break. Pending installs retry after phase
+changes and on app activation. A background check also runs on launch and
+activation when no Sparkle session is in progress.
 
 ## Keys and feed
 
-- Ed25519 private key stays in release secret `SPARKLE_ED25519_PRIVATE_KEY`;
-  only the public key belongs in app configuration (`SUPublicEDKey`).
+- Ed25519 private key stays in release secret `SPARKLE_ED25519_PRIVATE_KEY`.
 - `appcast.xml` is a release artifact (gitignored), not hand-edited source.
-- Feed URL must stay publicly readable (currently GitHub Releases
-  `…/latest/download/appcast.xml`; see `SUFeedURL` in `project.yml`).
+- Feed URL must stay publicly readable.
 - `generate_appcast` runs in `deploy-macos.yml` after
   `Scripts/ci-install-sparkle-tools.sh` installs the pinned Sparkle tools.
 

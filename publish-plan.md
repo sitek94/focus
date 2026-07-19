@@ -110,23 +110,22 @@ Acceptance (agent-driven):
 
 Commit 2 on `main`:
 
-- [ ] `project.yml`: real `SUPublicEDKey`, `SUAutomaticallyUpdate: YES`,
+- [x] `project.yml`: real `SUPublicEDKey`, `SUAutomaticallyUpdate: YES`,
       `SUScheduledCheckInterval: 3600`.
-- [ ] Background check on launch/activation when none is running.
-- [ ] Relaunch policy: Focus is a menu-bar app that never quits, so a
+- [x] Background check on launch/activation when none is running.
+- [x] Relaunch policy: Focus is a menu-bar app that never quits, so a
       downloaded update would sit pending forever. Add an `SPUUpdaterDelegate`
       seam: when an update is pending and the session is idle (not in
       warning/break), install + relaunch.
-- [ ] Embed commit: small physical Info.plist (merged with generated
-      `INFOPLIST_KEY_*`) carrying `FocusGitCommit = $(FOCUS_GIT_COMMIT)`;
+- [x] Embed commit: `INFOPLIST_KEY_FocusGitCommit = $(FOCUS_GIT_COMMIT)`;
       surface build number + commit in the settings menu ("is my fix live?").
-- [ ] Update `docs/sparkle.md`: real key posture, silent-update settings,
+- [x] Update `docs/sparkle.md`: real key posture, silent-update settings,
       relaunch policy.
 
 Acceptance:
 
 - [ ] Update lands hands-free within ~1h of push (or immediately on app
-      activation), never during a break.
+      activation), never during a break. (Verify after this commit deploys.)
 
 ## Phase 3 — iOS continuous deployment (TestFlight)
 
