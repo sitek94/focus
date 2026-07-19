@@ -32,11 +32,35 @@ KEY_PATH="${WORKDIR}/AuthKey_${APPLE_NOTARY_API_KEY_ID}.p8"
 printf '%s\n' "$APPLE_NOTARY_API_PRIVATE_KEY" >"$KEY_PATH"
 chmod 600 "$KEY_PATH"
 
-xcrun notarytool submit "$DMG_PATH" \
-  --key "$KEY_PATH" \
-  --key-id "$APPLE_NOTARY_API_KEY_ID" \
-  --issuer "$APPLE_NOTARY_API_ISSUER_ID" \
-  --wait
+set +e
+submit_out="$(
+  xcrun notarytool submit "$DMG_PATH" \
+    --key "$KEY_PATH" \
+    --key-id "$APPLE_NOTARY_API_KEY_ID" \
+    --issuer "$APPLE_NOTARY_API_ISSUER_ID" \
+    --wait 2>&1
+)"
+submit_status=$?
+set -e
+printf '%s\n' "$submit_out"
+
+submission_id="$(
+  printf '%s\n' "$submit_out" \
+    | awk '/[[:space:]]id:[[:space:]]/ { print $2; exit }'
+)"
+
+if [[ "$submit_status" -ne 0 ]] \
+  || ! grep -Eq 'status:[[:space:]]*Accepted' <<<"$submit_out"; then
+  echo "error: notarization did not accept ${DMG_PATH}" >&2
+  if [[ -n "$submission_id" ]]; then
+    echo "release-notarize: fetching notary log for ${submission_id}" >&2
+    xcrun notarytool log "$submission_id" \
+      --key "$KEY_PATH" \
+      --key-id "$APPLE_NOTARY_API_KEY_ID" \
+      --issuer "$APPLE_NOTARY_API_ISSUER_ID" >&2 || true
+  fi
+  exit 1
+fi
 
 xcrun stapler staple "$DMG_PATH"
 xcrun stapler validate "$DMG_PATH"

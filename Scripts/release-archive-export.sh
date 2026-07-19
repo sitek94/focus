@@ -72,6 +72,10 @@ xcodebuild_args=(
   -archivePath "$ARCHIVE_PATH"
   MARKETING_VERSION="${MARKETING_VERSION}"
   CURRENT_PROJECT_VERSION="${BUILD_NUMBER}"
+  CODE_SIGN_STYLE=Manual
+  CODE_SIGN_IDENTITY="Developer ID Application"
+  DEVELOPMENT_TEAM="${APPLE_TEAM_ID}"
+  OTHER_CODE_SIGN_FLAGS="--timestamp"
 )
 if [[ -n "${FOCUS_GIT_COMMIT:-}" ]]; then
   xcodebuild_args+=("FOCUS_GIT_COMMIT=${FOCUS_GIT_COMMIT}")
@@ -92,6 +96,17 @@ if [[ ! -d "$APP_PATH" ]]; then
 fi
 
 codesign --verify --deep --strict --verbose=2 "$APP_PATH"
+# Fail closed if we somehow still got an ad-hoc / local signature.
+signing_info="$(codesign -dv --verbose=2 "$APP_PATH" 2>&1 || true)"
+echo "$signing_info"
+if ! grep -Fq "Authority=Developer ID Application" <<<"$signing_info"; then
+  echo "error: Focus.app is not Developer ID Application signed" >&2
+  exit 1
+fi
+if grep -Eq 'Signature=adhoc|Authority=Sign to Run Locally' <<<"$signing_info"; then
+  echo "error: Focus.app still has an ad-hoc / local signature" >&2
+  exit 1
+fi
 
 # Minimal DMG packaging; refined layout can land with Sparkle app wiring.
 hdiutil create \

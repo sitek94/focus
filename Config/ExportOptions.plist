@@ -8,6 +8,8 @@
 	<string>export</string>
 	<key>signingStyle</key>
 	<string>manual</string>
+	<key>signingCertificate</key>
+	<string>Developer ID Application</string>
 	<key>teamID</key>
 	<string>$(APPLE_TEAM_ID)</string>
 </dict>
