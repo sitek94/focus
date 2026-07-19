@@ -88,14 +88,13 @@ if grep -Fq "SUPublicEDKey: ${placeholder_edkey}" project.yml \
     echo "error: SUPublicEDKey is still the all-zero placeholder; replace before a real release" >&2
     exit 1
   fi
-  echo "release-check: note: SUPublicEDKey is the documented all-zero placeholder (ok until release prep)"
+  echo "release-check: note: SUPublicEDKey is still the all-zero placeholder (ok until release prep)"
 elif ! grep -RFq "SUPublicEDKey" Apps Config project.yml 2>/dev/null; then
   echo "release-check: note: SUPublicEDKey not wired into app sources yet"
 fi
 
-feed_url="https://github.com/sitek94/focus/releases/latest/download/appcast.xml"
-if grep -Fq "$feed_url" docs/sparkle.md; then
-  echo "release-check: documented Sparkle feed URL present"
+if grep -Eq 'INFOPLIST_KEY_SUFeedURL:[[:space:]]*https://' project.yml; then
+  echo "release-check: Sparkle feed URL present in project.yml"
 fi
 
 check_secret_name() {

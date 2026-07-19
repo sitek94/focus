@@ -12,7 +12,7 @@ description: >
 
 1. `docs/release-macos.md` — versioning, tag policy, checklist, `make release-check`, CI vs release workflows.
 2. `docs/release-ios.md` — planned iOS path; why the iOS shell never ships from `release.yml`.
-3. `docs/sparkle.md` — Sparkle 2.9.4 pin, EdDSA key split, appcast hosting, update smoke expectations.
+3. `docs/sparkle.md` — EdDSA key split, appcast hosting, update smoke expectations.
 
 ## Exact checks
 

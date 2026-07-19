@@ -1,10 +1,10 @@
 # Cursor Cloud
 
-Cursor Cloud agents run on Linux (Ubuntu 24.04, x86_64). This environment has
-Swift 6.3.3 via [`swiftly`](https://www.swift.org/install/) under
-`~/.local/share/swiftly` (on `PATH` for login and non-login shells). Confirm
-with `swift --version`. Do not upgrade the toolchain without also updating
-package manifests, CI pins, `.swift-version`, and this file.
+Cursor Cloud agents run on Linux (Ubuntu 24.04, x86_64). The project-pinned
+Swift toolchain (see `.swift-version`) is installed via
+[`swiftly`](https://www.swift.org/install/) under `~/.local/share/swiftly` (on
+`PATH` for login and non-login shells). Confirm with `swift --version`. Do not
+upgrade it without also updating package manifests, CI pins, and `.swift-version`.
 
 ## Linux vs Apple
 
@@ -17,14 +17,13 @@ Linux is authoritative for:
 - portable `FocusSession`, `FocusPersistence`, `FocusControl`, and `focus`
 - Linux SQLite, CLI, and Unix-socket integration tests
 - docs, license, dependency, formatting, and static boundary checks
-- XcodeGen syntax/determinism (not Xcode 26.6 build compatibility)
+- XcodeGen syntax/determinism (not Apple SDK build compatibility)
 
-Use GitHub-hosted `macos-26` CI
-(`/Applications/Xcode_26.6.app/Contents/Developer`) for generation, Apple SDK
-builds, Darwin IPC/`getpeereid`, Simulator, XCUITest, and smoke tests. An
-interactive Mac is still required for VoiceOver, multi-display/Spaces behavior,
-Dockless no-flash, login-item revoke, App Translocation CLI install, and
-signed/notarized Sparkle updates.
+Use GitHub-hosted `macos-26` CI with the pinned Xcode (`.xcode-version`) for
+generation, Apple SDK builds, Darwin IPC/`getpeereid`, Simulator, XCUITest, and
+smoke tests. An interactive Mac is still required for VoiceOver, multi-display/
+Spaces behavior, Dockless no-flash, login-item revoke, App Translocation CLI
+install, and signed/notarized Sparkle updates.
 
 Apple Developer membership, signing credentials, Sparkle keys, feed hosting,
 and TestFlight can wait until release work. Apple portions of a PR need working

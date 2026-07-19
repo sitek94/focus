@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run Sparkle 2.9.4 generate_appcast against the final notarized DMG when the
+# Run Sparkle generate_appcast against the final notarized DMG when the
 # Ed25519 private key secret is present. Skips otherwise.
 # Usage: Scripts/release-generate-appcast.sh <dir-containing-dmg>
 set -euo pipefail
@@ -29,12 +29,10 @@ chmod 600 "$KEY_FILE"
 GENERATE_APPCAST="$(command -v generate_appcast || true)"
 if [[ -z "$GENERATE_APPCAST" ]]; then
   # Resolve from SwiftPM / Sparkle checkout when available later.
-  echo "error: generate_appcast not on PATH; install Sparkle 2.9.4 tools before release" >&2
+  echo "error: generate_appcast not on PATH; install Sparkle tools matching the project.yml pin before release" >&2
   exit 1
 fi
 
-# Minimum system 26.0 / arm64 hardware are documented in docs/sparkle.md;
-# generate_appcast flags depend on the installed Sparkle tools version.
 "$GENERATE_APPCAST" \
   --ed-key-file "$KEY_FILE" \
   --download-url-prefix "https://github.com/sitek94/focus/releases/latest/download/" \

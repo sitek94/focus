@@ -15,7 +15,7 @@ Routes agents to Focus’s suites and CI boundaries. Details and commands live i
 
 - New unit/integration tests: **Swift Testing** (`@Test`, `#expect` / `#require`, structs).
 - UI tests: **XCTest** / XCUITest only (Swift Testing has no UI support).
-- Swift 6.3 toolchain; treat installed toolchain as authoritative.
+- Pinned Swift toolchain (`.swift-version`); treat installed toolchain as authoritative.
 - Parallel-safe tests; inject clocks/clients; no real `Task.sleep` in portable suites.
 - Prefer parameterized tests for phase/command matrices without exploding Cartesian products.
 

@@ -8,9 +8,9 @@ read_when:
 
 # Releasing (macOS)
 
-Versioning starts at `0.1.0`. Tags are `vX.Y.Z`, signed locally by the owner,
-pushed before the release workflow runs. No tag-signing private key belongs in
-repository secrets.
+Tags are `vX.Y.Z`, signed locally by the owner, pushed before the release
+workflow runs. No tag-signing private key belongs in repository secrets.
+Marketing/build versions live in `Config/Shared.xcconfig` and `project.yml`.
 
 ## Checklist
 
@@ -22,7 +22,7 @@ repository secrets.
    - checks out the tag and runs the signed-tag policy placeholder
      (`Scripts/verify-signed-tag.sh`; real verification when
      `Config/git-allowed-signers` exists)
-   - selects Xcode 26.6, regenerates `Focus.xcodeproj`
+   - selects the pinned Xcode (`.xcode-version`), regenerates `Focus.xcodeproj`
    - imports Developer ID / archives / notarizes / generates Sparkle appcast
      only when the corresponding secrets/vars are present; otherwise those
      steps skip with an explicit log line

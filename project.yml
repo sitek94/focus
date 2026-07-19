@@ -61,7 +61,7 @@ targets:
         INFOPLIST_KEY_LSUIElement: YES
         INFOPLIST_KEY_NSHumanReadableCopyright: "Copyright © 2026 Maciek Sitkowski"
         # Placeholder Ed25519 public key (all-zero). Replace before shipping updates.
-        # See docs/sparkle.md — private key never belongs in source.
+        # Private key never belongs in source (see docs/sparkle.md).
         INFOPLIST_KEY_SUPublicEDKey: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
         INFOPLIST_KEY_SUFeedURL: https://github.com/sitek94/focus/releases/latest/download/appcast.xml
         INFOPLIST_KEY_SUEnableAutomaticChecks: YES
