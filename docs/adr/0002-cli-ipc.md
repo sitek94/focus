@@ -21,9 +21,8 @@ and timeout rules. The trust boundary is the logged-in user (same UID).
 
 - Protocol and much of the integration testing stay portable (Linux fixture).
 - Darwin adds `getpeereid` and path ownership checks.
-- If Focus later requires cryptographic proof that the caller is the signed
-  Focus CLI, migrate deliberately to signed XPC — do not extend the socket
-  protocol with ad hoc authentication.
+- If Focus later needs cryptographic proof that the caller is the signed Focus
+  CLI, migrate to signed XPC — do not bolt ad hoc auth onto the socket.
 
 ## Rejected
 

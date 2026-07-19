@@ -1,12 +1,8 @@
 # Focus
 
-Focus is a small native macOS menu-bar timer for fixed focus / warning / break /
-snooze cycles, with an in-bundle `focus` CLI and a compiling iOS shell. It is
-not a stats dashboard, blocker, or configurable pomodoro suite.
-
-**Status:** foundation in progress (SwiftPM core + XcodeGen project graph).
-Product timing, overlays, Sparkle updates, and release automation land in later
-checkpoints of the foundation PR.
+Focus is a native macOS menu-bar timer with fixed focus / warning / break /
+snooze cycles, an in-bundle `focus` CLI, and a minimal iOS shell. It is not a
+stats dashboard, blocker, or configurable pomodoro suite.
 
 ## Requirements
 

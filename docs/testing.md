@@ -25,10 +25,10 @@ Run all with `make test-linux`, or focused filters via `make test-session`,
 
 - `FocusMacIntegrationTests` — Darwin socket, `getpeereid`, adapters.
 - `FocusMacUITests` / `FocusIOSUITests` — minimal launch smokes only.
-- No screenshot/visual-regression tooling in v1.
+- No screenshot or visual-regression tooling in v1.
 
 ## Manual Mac only
 
 Multi-display overlays, Dockless no-flash, login-item enable/revoke, VoiceOver,
-App Translocation CLI install, and signed Sparkle update paths require an
+App Translocation CLI install, and signed Sparkle update paths need an
 interactive or credentialed Mac. They are not Linux-provable.

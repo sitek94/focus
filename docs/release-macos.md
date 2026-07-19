@@ -12,7 +12,7 @@ Versioning starts at `0.1.0`. Tags are `vX.Y.Z`, signed locally by the owner,
 pushed before the release workflow runs. No tag-signing private key belongs in
 repository secrets.
 
-## Checklist (high level)
+## Checklist
 
 1. Changelog section and `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` agree
    with the tag (`Config/Shared.xcconfig` and `project.yml`).
@@ -30,7 +30,7 @@ repository secrets.
      signed DMG was produced
 4. Clean-Mac install/update smoke, then publish the draft.
 5. Never release the iOS shell from this workflow (workflow guard forbids
-   iOS/`ipa` artifacts). See `docs/release-ios.md` for the iOS release path.
+   iOS/`ipa` artifacts). See `docs/release-ios.md`.
 
 ## CI vs release
 
@@ -44,7 +44,7 @@ modifies `appcast.xml` on merge.
 
 ## Prerequisites
 
-Owner-supplied repository configuration (never put secret values in source):
+Repository configuration (never put secret values in source):
 
 - Secrets: `APPLE_DEVELOPER_ID_APPLICATION_P12_BASE64`,
   `APPLE_DEVELOPER_ID_APPLICATION_P12_PASSWORD`, `APPLE_NOTARY_API_PRIVATE_KEY`,
@@ -53,9 +53,8 @@ Owner-supplied repository configuration (never put secret values in source):
   `APPLE_NOTARY_API_ISSUER_ID`
 
 Do not create both a secret and a variable for the same identifier. The workflow
-uses its scoped built-in `GITHUB_TOKEN`; no personal access token is an app or
-release prerequisite.
+uses its scoped built-in `GITHUB_TOKEN`; no personal access token is required.
 
-Supporting scripts live under `Scripts/release-*.sh`,
-`Scripts/verify-signed-tag.sh`, and `Scripts/archive-macos-ci.sh`. Details for
-Sparkle keys and feed hosting live in `docs/sparkle.md`.
+Supporting scripts: `Scripts/release-*.sh`, `Scripts/verify-signed-tag.sh`,
+`Scripts/archive-macos-ci.sh`. Sparkle keys and feed hosting:
+`docs/sparkle.md`.

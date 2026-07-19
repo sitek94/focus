@@ -34,19 +34,18 @@ Portable code lives under `Sources/` and `CLI/FocusCLI/`. It must not import
 | `FocusMacUITests` | `com.macieksitkowski.focus.macos.uitests` | Launch/menu smoke |
 | `FocusIOSUITests` | `com.macieksitkowski.focus.ios.uitests` | Launch/root-scene smoke |
 
-`com.macieksitkowski.focus` is the locked namespace prefix, not a concrete target.
+`com.macieksitkowski.focus` is the namespace prefix, not a concrete target.
 
 ## Ownership
 
 - Session policy and transitions: `FocusSession` only.
 - Persistence schema and transactions: `FocusPersistence` only.
 - Wire protocol and socket rules: `FocusControl` only.
-- UI and Apple SDK seams: `Apps/Focus/*` feature folders; no global “Managers”
-  dump.
+- UI and Apple SDK seams: `Apps/Focus/*` feature folders.
 - Project structure: `project.yml` + `Config/`; generated `Focus.xcodeproj` is
   ignored.
 
-### FocusMac owners (CP6/CP7)
+### FocusMac owners
 
 | Owner | Isolation | Domain |
 |---|---|---|

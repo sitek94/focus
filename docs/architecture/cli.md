@@ -9,8 +9,8 @@ read_when:
 # CLI and IPC
 
 The `focus` CLI talks to the running macOS app over a per-user Unix-domain
-socket using versioned length-prefixed JSON. Trust boundary is the logged-in
-user (same UID), not a particular signed process.
+socket using versioned length-prefixed JSON. The trust boundary is the
+logged-in user (same UID), not a particular signed process.
 
 ## Commands
 
@@ -29,8 +29,8 @@ Human-readable output is the default. `--json` is the only machine contract.
 
 Every successful mutation includes the authoritative post-commit state in the
 same response. Major protocol changes are breaking; minor changes may add
-fields. Both sides ignore unknown additive fields. JSON goes to stdout and
-contains no incidental logs; human errors go to stderr.
+fields. Both sides ignore unknown additive fields. JSON goes to stdout with no
+incidental logs; human errors go to stderr.
 
 | Exit | Meaning |
 |---:|---|
@@ -59,7 +59,7 @@ contains no incidental logs; human errors go to stderr.
 - If cryptographic proof of the signed CLI is later required, migrate to signed
   XPC rather than bolting auth onto the socket (ADR 0002).
 
-## Install story
+## Install
 
 Xcode embeds `focus` at `Focus.app/Contents/MacOS/focus`. “Install Command Line
 Tool…” creates a user-owned symlink (prefer `~/.local/bin/focus`); it never

@@ -10,7 +10,7 @@ read_when:
 
 ## Status
 
-Accepted for the foundation PR, conditional on the first macOS CI gate.
+Accepted, conditional on macOS CI continuing to generate and build cleanly.
 
 ## Decision
 
@@ -20,10 +20,10 @@ Set `options.projectFormat: xcode16_3`. Do not commit `Focus.xcodeproj`.
 
 ## Consequences
 
-- Linux can prove generator syntax and determinism only.
-- First Mac CI must generate cleanly, keep the project untracked, build
-  `FocusMac` and `FocusIOS`, archive `FocusMac`, and fail on project-format
-  upgrade warnings.
+- Linux proves generator syntax and determinism only.
+- Mac CI must generate cleanly, keep the project untracked, build `FocusMac`
+  and `FocusIOS`, archive `FocusMac`, and fail on project-format upgrade
+  warnings.
 - If XcodeGen cannot represent the required Xcode 26 project, replace it once
   with a checked-in native Xcode 26 project and update this ADR. Do not patch
   generated `.pbxproj` files or maintain both strategies.

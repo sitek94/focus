@@ -31,9 +31,8 @@ Sparkle is linked through XcodeGen/`project.yml` as a remote Swift package on th
 - Ed25519 private key stays in release secret `SPARKLE_ED25519_PRIVATE_KEY`;
   only the public key belongs in app configuration (`SUPublicEDKey`).
 - `appcast.xml` is a release artifact (gitignored), not hand-edited source.
-- Proposed feed:
+- Feed URL (requires publicly readable release assets):
   `https://github.com/sitek94/focus/releases/latest/download/appcast.xml`
-  (requires publicly readable release assets).
 - Minimum system `26.0`, hardware `arm64`.
 - `generate_appcast` runs in `release.yml` only when the private key secret is
   present; otherwise the step skips with a clear log.
