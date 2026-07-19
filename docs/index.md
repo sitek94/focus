@@ -7,9 +7,10 @@ read_when:
 
 # Docs index
 
-Contributing documentation for this repository. Start with
-[writing documentation](./writing-documentation.md) when you edit docs, skills,
-or `AGENTS.md`.
+Contributing documentation for this repository.
+
+Start with [writing documentation](./writing-documentation.md) when you edit
+docs, skills, or `AGENTS.md`.
 
 | Page | Purpose |
 |---|---|

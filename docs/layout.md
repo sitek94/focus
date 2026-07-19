@@ -9,8 +9,8 @@ read_when:
 # Repository layout
 
 Focus is a monorepo with a portable SwiftPM core and an XcodeGen-generated
-Apple project. Application feature logic in this tree is still a skeleton; the
-durable structure is the package layout, proof boundary, and release wiring.
+Apple project. This page covers directories, identifiers, and the Linux vs
+Apple proof boundary.
 
 ## Directories
 
@@ -52,15 +52,13 @@ or `UIKit`.
 
 ## Proof boundary
 
-| Authoritative on Linux | Requires macOS + pinned Xcode |
-|---|---|
-| Portable libraries and `focus` CLI | `FocusMac` / `FocusIOS` builds, archives, UI tests |
-| Linux SQLite and Unix-socket CLI tests | Darwin IPC, login item, overlays |
-| Docs, license, format | Sparkle update, notarization, VoiceOver |
-| XcodeGen syntax and determinism | Generated project compatibility with pinned Xcode |
+Linux is authoritative for portable libraries, CLI tests, docs, and XcodeGen
+syntax. macOS with pinned Xcode is required for app builds, archives, Darwin
+IPC, UI tests, Sparkle, and notarization. Linux generation does not prove Xcode
+can build the project.
 
-Linux generation does not prove Xcode can build the project. Full command index:
-[`AGENTS.md`](../AGENTS.md). Cursor Cloud notes: [`.cursor/CLOUD.md`](../.cursor/CLOUD.md).
+Full table and command index: [`AGENTS.md`](../AGENTS.md). Cursor Cloud notes:
+[`.cursor/CLOUD.md`](../.cursor/CLOUD.md).
 
 ## Project generation
 
@@ -70,6 +68,5 @@ Edit `project.yml` and `Config/*.xcconfig`. Do not hand-edit generated
 
 ## Non-scope
 
-This page does not document session policy, CLI command semantics, or UI
-feature ownership. Those areas remain placeholder code until product docs are
-worth writing.
+Session policy, CLI command semantics, and UI feature ownership are out of
+scope on this page.
